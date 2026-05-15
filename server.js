@@ -48,25 +48,16 @@ app.get("/dashboard", (req, res) => {
     `;
 
     db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
-
+        if (err) return res.status(500).json({ success: false, error: err.message });
         res.json({ success: true, data: results });
     });
 });
 
 app.get("/pazaryerleri", (req, res) => {
-    db.query(
-        "SELECT id, ad FROM pazaryerleri ORDER BY id DESC",
-        (err, results) => {
-            if (err) {
-                return res.status(500).json({ success: false, error: err.message });
-            }
-
-            res.json({ success: true, data: results });
-        }
-    );
+    db.query("SELECT id, ad FROM pazaryerleri ORDER BY id DESC", (err, results) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true, data: results });
+    });
 });
 
 app.post("/pazaryeri-ekle", (req, res) => {
@@ -79,21 +70,15 @@ app.post("/pazaryeri-ekle", (req, res) => {
         });
     }
 
-    db.query(
-        "INSERT INTO pazaryerleri (ad) VALUES (?)",
-        [ad],
-        (err, result) => {
-            if (err) {
-                return res.status(500).json({ success: false, error: err.message });
-            }
+    db.query("INSERT INTO pazaryerleri (ad) VALUES (?)", [ad], (err, result) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
-            res.json({
-                success: true,
-                message: "Pazaryeri eklendi",
-                insert_id: result.insertId
-            });
-        }
-    );
+        res.json({
+            success: true,
+            message: "Pazaryeri eklendi",
+            insert_id: result.insertId
+        });
+    });
 });
 
 app.put("/pazaryeri-guncelle/:id", (req, res) => {
@@ -107,72 +92,70 @@ app.put("/pazaryeri-guncelle/:id", (req, res) => {
         });
     }
 
-    db.query(
-        "UPDATE pazaryerleri SET ad = ? WHERE id = ?",
-        [ad, id],
-        (err) => {
-            if (err) {
-                return res.status(500).json({ success: false, error: err.message });
-            }
+    db.query("UPDATE pazaryerleri SET ad = ? WHERE id = ?", [ad, id], (err) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
-            res.json({
-                success: true,
-                message: "Pazaryeri güncellendi"
-            });
-        }
-    );
+        res.json({
+            success: true,
+            message: "Pazaryeri güncellendi"
+        });
+    });
 });
 
 app.delete("/pazaryeri-sil/:id", (req, res) => {
     const { id } = req.params;
 
-    db.query(
-        "DELETE FROM satislar WHERE pazaryeri_id = ?",
-        [id],
-        (err) => {
+    db.getConnection((err, connection) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
+        connection.beginTransaction((err) => {
             if (err) {
-                return res.status(500).json({
-                    success: false,
-                    error: err.message
-                });
-            }
-
-            db.query(
-                "DELETE FROM pazaryerleri WHERE id = ?",
-                [id],
-                (err2) => {
-
-                    if (err2) {
-                        return res.status(500).json({
-                            success: false,
-                            error: err2.message
-                        });
-                    }
-
-                    res.json({
-                        success: true,
-                        message: "Pazaryeri silindi"
-                    });
-
-                }
-            );
-
-        }
-    );
-});
-
-app.get("/urunler", (req, res) => {
-    db.query(
-        "SELECT * FROM urunler ORDER BY id DESC",
-        (err, results) => {
-            if (err) {
+                connection.release();
                 return res.status(500).json({ success: false, error: err.message });
             }
 
-            res.json({ success: true, data: results });
-        }
-    );
+            connection.query("DELETE FROM satislar WHERE pazaryeri_id = ?", [id], (err) => {
+                if (err) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(500).json({ success: false, step: "pazaryeri_satis_sil", error: err.message });
+                    });
+                }
+
+                connection.query("DELETE FROM pazaryerleri WHERE id = ?", [id], (err, result) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ success: false, step: "pazaryeri_sil", error: err.message });
+                        });
+                    }
+
+                    connection.commit((err) => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(500).json({ success: false, error: err.message });
+                            });
+                        }
+
+                        connection.release();
+
+                        res.json({
+                            success: true,
+                            message: result.affectedRows > 0 ? "Pazaryeri silindi" : "Silinecek pazaryeri bulunamadı"
+                        });
+                    });
+                });
+            });
+        });
+    });
+});
+
+app.get("/urunler", (req, res) => {
+    db.query("SELECT * FROM urunler ORDER BY id DESC", (err, results) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
+        res.json({ success: true, data: results });
+    });
 });
 
 app.post("/urun-ekle", (req, res) => {
@@ -204,9 +187,7 @@ app.post("/urun-ekle", (req, res) => {
         satis_fiyati || 0,
         stok || 0
     ], (err, result) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
         res.json({
             success: true,
@@ -252,9 +233,7 @@ app.put("/urun-guncelle/:id", (req, res) => {
         stok || 0,
         id
     ], (err) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
         res.json({
             success: true,
@@ -264,46 +243,62 @@ app.put("/urun-guncelle/:id", (req, res) => {
 });
 
 app.delete("/urun-sil/:id", (req, res) => {
-
     const { id } = req.params;
 
-    db.query(
-        "DELETE FROM satislar WHERE urun_id = ?",
-        [id],
-        (err) => {
+    db.getConnection((err, connection) => {
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
+        connection.beginTransaction((err) => {
             if (err) {
-                return res.status(500).json({
-                    success: false,
-                    error: err.message
-                });
+                connection.release();
+                return res.status(500).json({ success: false, error: err.message });
             }
 
-            db.query(
-                "DELETE FROM urunler WHERE id = ?",
-                [id],
-                (err2) => {
+            connection.query("DELETE FROM satislar WHERE urun_id = ?", [id], (err) => {
+                if (err) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(500).json({ success: false, step: "urun_satis_sil", error: err.message });
+                    });
+                }
 
-                    if (err2) {
-                        return res.status(500).json({
-                            success: false,
-                            error: err2.message
+                connection.query("DELETE FROM stok_hareketleri WHERE urun_id = ?", [id], (err) => {
+                    if (err) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(500).json({ success: false, step: "stok_hareketleri_sil", error: err.message });
                         });
                     }
 
-                    res.json({
-                        success: true,
-                        message: "Ürün silindi"
+                    connection.query("DELETE FROM urunler WHERE id = ?", [id], (err, result) => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(500).json({ success: false, step: "urun_sil", error: err.message });
+                            });
+                        }
+
+                        connection.commit((err) => {
+                            if (err) {
+                                return connection.rollback(() => {
+                                    connection.release();
+                                    res.status(500).json({ success: false, error: err.message });
+                                });
+                            }
+
+                            connection.release();
+
+                            res.json({
+                                success: true,
+                                message: result.affectedRows > 0 ? "Ürün silindi" : "Silinecek ürün bulunamadı"
+                            });
+                        });
                     });
-
-                }
-            );
-
-        }
-    );
-
+                });
+            });
+        });
+    });
 });
-
 
 app.get("/satislar", (req, res) => {
     const sql = `
@@ -325,10 +320,7 @@ app.get("/satislar", (req, res) => {
     `;
 
     db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
-
+        if (err) return res.status(500).json({ success: false, error: err.message });
         res.json({ success: true, data: results });
     });
 });
@@ -359,9 +351,7 @@ app.post("/satis-ekle", (req, res) => {
     }
 
     db.getConnection((err, connection) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
         connection.beginTransaction((err) => {
             if (err) {
@@ -369,56 +359,55 @@ app.post("/satis-ekle", (req, res) => {
                 return res.status(500).json({ success: false, error: err.message });
             }
 
-            connection.query(
-                "SELECT alis_fiyati, stok FROM urunler WHERE id = ?",
-                [urun_id],
-                (err, urunRows) => {
-                    if (err || urunRows.length === 0) {
+            connection.query("SELECT alis_fiyati, stok FROM urunler WHERE id = ?", [urun_id], (err, urunRows) => {
+                if (err || urunRows.length === 0) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(404).json({ success: false, message: "Ürün bulunamadı" });
+                    });
+                }
+
+                const satisAdet = Number(adet);
+                const alisFiyati = Number(urunRows[0].alis_fiyati);
+                const mevcutStok = Number(urunRows[0].stok);
+
+                if (mevcutStok < satisAdet) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(400).json({ success: false, message: "Yetersiz stok" });
+                    });
+                }
+
+                const toplamSatis = Number(satis_fiyati) * satisAdet;
+                const toplamAlis = alisFiyati * satisAdet;
+                const kdvTutar = toplamSatis * (Number(kdv_orani || 0) / 100);
+                const kargo = Number(kargo_ucreti || 0);
+                const netKazanc = toplamSatis - toplamAlis - kdvTutar - kargo;
+
+                const sql = `
+                    INSERT INTO satislar
+                    (tarih, pazaryeri_id, urun_id, adet, satis_fiyati, kdv_orani, kargo_ucreti, net_kazanc)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                connection.query(sql, [
+                    mysqlTarih,
+                    pazaryeri_id,
+                    urun_id,
+                    satisAdet,
+                    satis_fiyati,
+                    kdv_orani || 0,
+                    kargo,
+                    netKazanc
+                ], (err, result) => {
+                    if (err) {
                         return connection.rollback(() => {
                             connection.release();
-                            res.status(404).json({
-                                success: false,
-                                message: "Ürün bulunamadı"
-                            });
+                            res.status(500).json({ success: false, error: err.message });
                         });
                     }
 
-                    const satisAdet = Number(adet);
-                    const alisFiyati = Number(urunRows[0].alis_fiyati);
-                    const mevcutStok = Number(urunRows[0].stok);
-
-                    if (mevcutStok < satisAdet) {
-                        return connection.rollback(() => {
-                            connection.release();
-                            res.status(400).json({
-                                success: false,
-                                message: "Yetersiz stok"
-                            });
-                        });
-                    }
-
-                    const toplamSatis = Number(satis_fiyati) * satisAdet;
-                    const toplamAlis = alisFiyati * satisAdet;
-                    const kdvTutar = toplamSatis * (Number(kdv_orani || 0) / 100);
-                    const kargo = Number(kargo_ucreti || 0);
-                    const netKazanc = toplamSatis - toplamAlis - kdvTutar - kargo;
-
-                    const sql = `
-                        INSERT INTO satislar
-                        (tarih, pazaryeri_id, urun_id, adet, satis_fiyati, kdv_orani, kargo_ucreti, net_kazanc)
-                        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-                    `;
-
-                    connection.query(sql, [
-                        mysqlTarih,
-                        pazaryeri_id,
-                        urun_id,
-                        satisAdet,
-                        satis_fiyati,
-                        kdv_orani || 0,
-                        kargo,
-                        netKazanc
-                    ], (err, result) => {
+                    connection.query("UPDATE urunler SET stok = stok - ? WHERE id = ?", [satisAdet, urun_id], (err) => {
                         if (err) {
                             return connection.rollback(() => {
                                 connection.release();
@@ -426,39 +415,26 @@ app.post("/satis-ekle", (req, res) => {
                             });
                         }
 
-                        connection.query(
-                            "UPDATE urunler SET stok = stok - ? WHERE id = ?",
-                            [satisAdet, urun_id],
-                            (err) => {
-                                if (err) {
-                                    return connection.rollback(() => {
-                                        connection.release();
-                                        res.status(500).json({ success: false, error: err.message });
-                                    });
-                                }
-
-                                connection.commit((err) => {
-                                    if (err) {
-                                        return connection.rollback(() => {
-                                            connection.release();
-                                            res.status(500).json({ success: false, error: err.message });
-                                        });
-                                    }
-
+                        connection.commit((err) => {
+                            if (err) {
+                                return connection.rollback(() => {
                                     connection.release();
-
-                                    res.json({
-                                        success: true,
-                                        message: "Satış eklendi",
-                                        insert_id: result.insertId,
-                                        net_kazanc: netKazanc
-                                    });
+                                    res.status(500).json({ success: false, error: err.message });
                                 });
                             }
-                        );
+
+                            connection.release();
+
+                            res.json({
+                                success: true,
+                                message: "Satış eklendi",
+                                insert_id: result.insertId,
+                                net_kazanc: netKazanc
+                            });
+                        });
                     });
-                }
-            );
+                });
+            });
         });
     });
 });
@@ -484,9 +460,7 @@ app.put("/satis-guncelle/:id", (req, res) => {
     }
 
     db.getConnection((err, connection) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
         connection.beginTransaction((err) => {
             if (err) {
@@ -494,27 +468,74 @@ app.put("/satis-guncelle/:id", (req, res) => {
                 return res.status(500).json({ success: false, error: err.message });
             }
 
-            connection.query(
-                "SELECT urun_id, adet FROM satislar WHERE id = ?",
-                [id],
-                (err, eskiRows) => {
-                    if (err || eskiRows.length === 0) {
+            connection.query("SELECT urun_id, adet FROM satislar WHERE id = ?", [id], (err, eskiRows) => {
+                if (err || eskiRows.length === 0) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(404).json({ success: false, message: "Satış bulunamadı" });
+                    });
+                }
+
+                const eskiUrunId = eskiRows[0].urun_id;
+                const eskiAdet = Number(eskiRows[0].adet);
+
+                connection.query("UPDATE urunler SET stok = stok + ? WHERE id = ?", [eskiAdet, eskiUrunId], (err) => {
+                    if (err) {
                         return connection.rollback(() => {
                             connection.release();
-                            res.status(404).json({
-                                success: false,
-                                message: "Satış bulunamadı"
-                            });
+                            res.status(500).json({ success: false, error: err.message });
                         });
                     }
 
-                    const eskiUrunId = eskiRows[0].urun_id;
-                    const eskiAdet = Number(eskiRows[0].adet);
+                    connection.query("SELECT alis_fiyati, stok FROM urunler WHERE id = ?", [urun_id], (err, urunRows) => {
+                        if (err || urunRows.length === 0) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(404).json({ success: false, message: "Ürün bulunamadı" });
+                            });
+                        }
 
-                    connection.query(
-                        "UPDATE urunler SET stok = stok + ? WHERE id = ?",
-                        [eskiAdet, eskiUrunId],
-                        (err) => {
+                        const yeniAdet = Number(adet);
+                        const mevcutStok = Number(urunRows[0].stok);
+                        const alisFiyati = Number(urunRows[0].alis_fiyati);
+
+                        if (mevcutStok < yeniAdet) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(400).json({ success: false, message: "Yetersiz stok" });
+                            });
+                        }
+
+                        const toplamSatis = Number(satis_fiyati) * yeniAdet;
+                        const toplamAlis = alisFiyati * yeniAdet;
+                        const kdvTutar = toplamSatis * (Number(kdv_orani || 0) / 100);
+                        const kargo = Number(kargo_ucreti || 0);
+                        const netKazanc = toplamSatis - toplamAlis - kdvTutar - kargo;
+
+                        const sql = `
+                            UPDATE satislar
+                            SET tarih = ?,
+                                pazaryeri_id = ?,
+                                urun_id = ?,
+                                adet = ?,
+                                satis_fiyati = ?,
+                                kdv_orani = ?,
+                                kargo_ucreti = ?,
+                                net_kazanc = ?
+                            WHERE id = ?
+                        `;
+
+                        connection.query(sql, [
+                            mysqlTarih,
+                            pazaryeri_id,
+                            urun_id,
+                            yeniAdet,
+                            satis_fiyati,
+                            kdv_orani || 0,
+                            kargo,
+                            netKazanc,
+                            id
+                        ], (err) => {
                             if (err) {
                                 return connection.rollback(() => {
                                     connection.release();
@@ -522,107 +543,35 @@ app.put("/satis-guncelle/:id", (req, res) => {
                                 });
                             }
 
-                            connection.query(
-                                "SELECT alis_fiyati, stok FROM urunler WHERE id = ?",
-                                [urun_id],
-                                (err, urunRows) => {
-                                    if (err || urunRows.length === 0) {
-                                        return connection.rollback(() => {
-                                            connection.release();
-                                            res.status(404).json({
-                                                success: false,
-                                                message: "Ürün bulunamadı"
-                                            });
-                                        });
-                                    }
-
-                                    const yeniAdet = Number(adet);
-                                    const mevcutStok = Number(urunRows[0].stok);
-                                    const alisFiyati = Number(urunRows[0].alis_fiyati);
-
-                                    if (mevcutStok < yeniAdet) {
-                                        return connection.rollback(() => {
-                                            connection.release();
-                                            res.status(400).json({
-                                                success: false,
-                                                message: "Yetersiz stok"
-                                            });
-                                        });
-                                    }
-
-                                    const toplamSatis = Number(satis_fiyati) * yeniAdet;
-                                    const toplamAlis = alisFiyati * yeniAdet;
-                                    const kdvTutar = toplamSatis * (Number(kdv_orani || 0) / 100);
-                                    const kargo = Number(kargo_ucreti || 0);
-                                    const netKazanc = toplamSatis - toplamAlis - kdvTutar - kargo;
-
-                                    const sql = `
-                                        UPDATE satislar
-                                        SET tarih = ?,
-                                            pazaryeri_id = ?,
-                                            urun_id = ?,
-                                            adet = ?,
-                                            satis_fiyati = ?,
-                                            kdv_orani = ?,
-                                            kargo_ucreti = ?,
-                                            net_kazanc = ?
-                                        WHERE id = ?
-                                    `;
-
-                                    connection.query(sql, [
-                                        mysqlTarih,
-                                        pazaryeri_id,
-                                        urun_id,
-                                        yeniAdet,
-                                        satis_fiyati,
-                                        kdv_orani || 0,
-                                        kargo,
-                                        netKazanc,
-                                        id
-                                    ], (err) => {
-                                        if (err) {
-                                            return connection.rollback(() => {
-                                                connection.release();
-                                                res.status(500).json({ success: false, error: err.message });
-                                            });
-                                        }
-
-                                        connection.query(
-                                            "UPDATE urunler SET stok = stok - ? WHERE id = ?",
-                                            [yeniAdet, urun_id],
-                                            (err) => {
-                                                if (err) {
-                                                    return connection.rollback(() => {
-                                                        connection.release();
-                                                        res.status(500).json({ success: false, error: err.message });
-                                                    });
-                                                }
-
-                                                connection.commit((err) => {
-                                                    if (err) {
-                                                        return connection.rollback(() => {
-                                                            connection.release();
-                                                            res.status(500).json({ success: false, error: err.message });
-                                                        });
-                                                    }
-
-                                                    connection.release();
-
-                                                    res.json({
-                                                        success: true,
-                                                        message: "Satış güncellendi",
-                                                        net_kazanc: netKazanc
-                                                    });
-                                                });
-                                            }
-                                        );
+                            connection.query("UPDATE urunler SET stok = stok - ? WHERE id = ?", [yeniAdet, urun_id], (err) => {
+                                if (err) {
+                                    return connection.rollback(() => {
+                                        connection.release();
+                                        res.status(500).json({ success: false, error: err.message });
                                     });
                                 }
-                            );
-                        }
-                    );
-                }
-            );
+
+                                connection.commit((err) => {
+                                    if (err) {
+                                        return connection.rollback(() => {
+                                            connection.release();
+                                            res.status(500).json({ success: false, error: err.message });
+                                        });
+                                    }
+
+                                    connection.release();
+
+                                    res.json({
+                                        success: true,
+                                        message: "Satış güncellendi",
+                                        net_kazanc: netKazanc
+                                    });
+                                });
+                            });
+                        });
+                    });
+                });
+            });
         });
     });
 });
@@ -631,9 +580,7 @@ app.delete("/satis-sil/:id", (req, res) => {
     const { id } = req.params;
 
     db.getConnection((err, connection) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
         connection.beginTransaction((err) => {
             if (err) {
@@ -641,27 +588,34 @@ app.delete("/satis-sil/:id", (req, res) => {
                 return res.status(500).json({ success: false, error: err.message });
             }
 
-            connection.query(
-                "SELECT urun_id, adet FROM satislar WHERE id = ?",
-                [id],
-                (err, rows) => {
-                    if (err || rows.length === 0) {
+            connection.query("SELECT urun_id, adet FROM satislar WHERE id = ?", [id], (err, rows) => {
+                if (err || rows.length === 0) {
+                    return connection.rollback(() => {
+                        connection.release();
+                        res.status(404).json({ success: false, message: "Satış bulunamadı" });
+                    });
+                }
+
+                const urunId = rows[0].urun_id;
+                const adet = Number(rows[0].adet);
+
+                connection.query("DELETE FROM satislar WHERE id = ?", [id], (err, result) => {
+                    if (err) {
                         return connection.rollback(() => {
                             connection.release();
-                            res.status(404).json({
-                                success: false,
-                                message: "Satış bulunamadı"
-                            });
+                            res.status(500).json({ success: false, error: err.message });
                         });
                     }
 
-                    const urunId = rows[0].urun_id;
-                    const adet = Number(rows[0].adet);
+                    connection.query("UPDATE urunler SET stok = stok + ? WHERE id = ?", [adet, urunId], (err) => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(500).json({ success: false, error: err.message });
+                            });
+                        }
 
-                    connection.query(
-                        "DELETE FROM satislar WHERE id = ?",
-                        [id],
-                        (err) => {
+                        connection.commit((err) => {
                             if (err) {
                                 return connection.rollback(() => {
                                     connection.release();
@@ -669,38 +623,16 @@ app.delete("/satis-sil/:id", (req, res) => {
                                 });
                             }
 
-                            connection.query(
-                                "UPDATE urunler SET stok = stok + ? WHERE id = ?",
-                                [adet, urunId],
-                                (err) => {
-                                    if (err) {
-                                        return connection.rollback(() => {
-                                            connection.release();
-                                            res.status(500).json({ success: false, error: err.message });
-                                        });
-                                    }
+                            connection.release();
 
-                                    connection.commit((err) => {
-                                        if (err) {
-                                            return connection.rollback(() => {
-                                                connection.release();
-                                                res.status(500).json({ success: false, error: err.message });
-                                            });
-                                        }
-
-                                        connection.release();
-
-                                        res.json({
-                                            success: true,
-                                            message: "Satış silindi, stok geri eklendi"
-                                        });
-                                    });
-                                }
-                            );
-                        }
-                    );
-                }
-            );
+                            res.json({
+                                success: true,
+                                message: result.affectedRows > 0 ? "Satış silindi, stok geri eklendi" : "Silinecek satış bulunamadı"
+                            });
+                        });
+                    });
+                });
+            });
         });
     });
 });
@@ -719,9 +651,7 @@ app.get("/stok", (req, res) => {
     `;
 
     db.query(sql, (err, results) => {
-        if (err) {
-            return res.status(500).json({ success: false, error: err.message });
-        }
+        if (err) return res.status(500).json({ success: false, error: err.message });
 
         res.json({
             success: true,
