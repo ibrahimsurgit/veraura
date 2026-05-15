@@ -135,9 +135,16 @@ input,select{
     display:block;
 }
 
+.chart-wrapper{
+    width:100%;
+    max-width:420px;
+    height:280px;
+    margin:0 auto;
+}
+
 canvas{
     width:100%!important;
-    height:350px!important;
+    height:100%!important;
 }
 
 </style>
@@ -191,9 +198,12 @@ canvas{
             </div>
 
             <div class="card">
-                <h2>Pazaryeri Kazanç Grafiği</h2>
-                <canvas id="pazaryeriChart"></canvas>
-            </div>
+    <h2>Pazaryeri Kazanç Grafiği</h2>
+
+    <div class="chart-wrapper">
+        <canvas id="pazaryeriChart"></canvas>
+    </div>
+</div>
 
         </section>
 
