@@ -8,63 +8,14 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#111827}
+.login-page{min-height:100vh;display:flex;justify-content:center;align-items:center;background:linear-gradient(135deg,#020617,#111827)}
+.login-box{width:380px;background:#0f172a;padding:35px;border-radius:22px;box-shadow:0 0 40px rgba(255,0,184,.25);border:1px solid rgba(255,0,184,.35)}
+.login-logo{text-align:center;font-size:34px;font-weight:bold;color:#ff00b8;margin-bottom:8px}
+.login-sub{text-align:center;color:#94a3b8;margin-bottom:28px}
+.login-box input{width:100%;padding:14px;margin-bottom:14px;border:none;border-radius:10px;background:#1e293b;color:white}
+.login-box button{width:100%;padding:14px;border:none;border-radius:10px;background:#ff00b8;color:white;font-weight:bold;cursor:pointer}
+.error{display:none;color:#ff6b6b;text-align:center;margin-top:15px}
 
-/* LOGIN */
-.login-page{
-    min-height:100vh;
-    display:flex;
-    justify-content:center;
-    align-items:center;
-    background:linear-gradient(135deg,#020617,#111827);
-}
-.login-box{
-    width:380px;
-    background:#0f172a;
-    padding:35px;
-    border-radius:22px;
-    box-shadow:0 0 40px rgba(255,0,184,.25);
-    border:1px solid rgba(255,0,184,.35);
-}
-.login-logo{
-    text-align:center;
-    font-size:34px;
-    font-weight:bold;
-    color:#ff00b8;
-    margin-bottom:8px;
-}
-.login-sub{
-    text-align:center;
-    color:#94a3b8;
-    margin-bottom:28px;
-}
-.login-box input{
-    width:100%;
-    padding:14px;
-    margin-bottom:14px;
-    border:none;
-    border-radius:10px;
-    background:#1e293b;
-    color:white;
-    outline:none;
-}
-.login-box button{
-    width:100%;
-    padding:14px;
-    border:none;
-    border-radius:10px;
-    background:#ff00b8;
-    color:white;
-    font-weight:bold;
-    cursor:pointer;
-}
-.error{
-    display:none;
-    color:#ff6b6b;
-    text-align:center;
-    margin-top:15px;
-}
-
-/* PANEL */
 .layout{display:none;min-height:100vh}
 .sidebar{width:250px;background:#0f172a;color:white;padding:22px}
 .logo{font-size:26px;font-weight:bold;color:#ff00b8;margin-bottom:35px}
@@ -74,13 +25,16 @@ body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#111827}
 .topbar{background:white;padding:18px 22px;border-radius:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.06)}
 .card{background:white;border-radius:16px;padding:22px;box-shadow:0 4px 16px rgba(0,0,0,.06);margin-bottom:20px}
 .grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.form-grid{display:grid;grid-template-columns:repeat(5,1fr);gap:12px;margin-top:15px}
+input,select{padding:12px;border:1px solid #ddd;border-radius:10px;width:100%}
+.btn{background:#ff00b8;color:white;border:none;padding:12px 20px;border-radius:10px;cursor:pointer;margin-top:15px}
+.logout{background:#0f172a;color:white;border:none;padding:10px 15px;border-radius:10px;cursor:pointer}
 .stat-title{color:#64748b;font-size:14px}
 .stat-value{font-size:26px;font-weight:bold;margin-top:8px}
 table{width:100%;border-collapse:collapse}
 th,td{padding:13px;border-bottom:1px solid #e5e7eb;text-align:left}
 th{background:#f8fafc;color:#475569}
 .kazanc{color:#16a34a;font-weight:bold}
-.logout{background:#0f172a;color:white;border:none;padding:10px 15px;border-radius:10px;cursor:pointer}
 .view{display:none}
 .view.active{display:block}
 </style>
@@ -92,122 +46,151 @@ th{background:#f8fafc;color:#475569}
     <div class="login-box">
         <div class="login-logo">VERAURA</div>
         <div class="login-sub">Satış & Stok Takip Paneli</div>
-
         <input type="text" id="username" placeholder="Kullanıcı adı">
         <input type="password" id="password" placeholder="Şifre">
-
         <button onclick="login()">Giriş Yap</button>
-
         <div class="error" id="errorBox">Kullanıcı adı veya şifre hatalı</div>
     </div>
 </div>
 
 <div class="layout" id="panel">
-    <aside class="sidebar">
-        <div class="logo">VERAURA</div>
+<aside class="sidebar">
+    <div class="logo">VERAURA</div>
+    <div class="menu">
+        <button class="active" onclick="sayfaAc('dashboard',this)">Dashboard</button>
+        <button onclick="sayfaAc('urunler',this)">Ürünler</button>
+        <button onclick="sayfaAc('satislar',this)">Satışlar</button>
+        <button onclick="sayfaAc('pazaryerleri',this)">Pazaryerleri</button>
+        <button onclick="sayfaAc('stok',this)">Stok</button>
+        <button onclick="sayfaAc('raporlar',this)">Raporlar</button>
+    </div>
+</aside>
 
-        <div class="menu">
-            <button class="active" onclick="sayfaAc('dashboard', this)">Dashboard</button>
-            <button onclick="sayfaAc('urunler', this)">Ürünler</button>
-            <button onclick="sayfaAc('satislar', this)">Satışlar</button>
-            <button onclick="sayfaAc('pazaryerleri', this)">Pazaryerleri</button>
-            <button onclick="sayfaAc('stok', this)">Stok</button>
-            <button onclick="sayfaAc('raporlar', this)">Raporlar</button>
+<main class="main">
+<div class="topbar">
+    <div>
+        <strong id="sayfaBaslik">Dashboard</strong><br>
+        <small id="sayfaAltBaslik">Satış ve stok takip özeti</small>
+    </div>
+    <button class="logout" onclick="cikisYap()">Çıkış</button>
+</div>
+
+<section id="dashboard" class="view active">
+    <div class="grid">
+        <div class="card"><div class="stat-title">Toplam Sipariş</div><div class="stat-value" id="toplamSiparis">0</div></div>
+        <div class="card"><div class="stat-title">Toplam Adet</div><div class="stat-value" id="toplamAdet">0</div></div>
+        <div class="card"><div class="stat-title">Toplam Kazanç</div><div class="stat-value" id="toplamKazanc">0 ₺</div></div>
+        <div class="card"><div class="stat-title">Pazaryeri</div><div class="stat-value" id="pazaryeriSayisi">0</div></div>
+    </div>
+
+    <div class="card">
+        <h2>Pazaryeri Özeti</h2>
+        <table id="dashboardTable">
+            <thead><tr><th>Pazaryeri</th><th>Sipariş</th><th>Adet</th><th>Toplam Kazanç</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
+
+<section id="urunler" class="view">
+    <div class="card">
+        <h2>Ürün Ekle</h2>
+        <div class="form-grid">
+            <input id="urun_kodu" placeholder="Ürün Kodu">
+            <input id="urun_adi" placeholder="Ürün Adı">
+            <input id="alis_fiyati" type="number" placeholder="Alış Fiyatı">
+            <input id="satis_fiyati" type="number" placeholder="Satış Fiyatı">
+            <input id="stok" type="number" placeholder="Stok">
         </div>
-    </aside>
+        <button class="btn" onclick="urunEkle()">Ürün Ekle</button>
+    </div>
 
-    <main class="main">
-        <div class="topbar">
-            <div>
-                <strong id="sayfaBaslik">Dashboard</strong><br>
-                <small id="sayfaAltBaslik">Satış ve stok takip özeti</small>
-            </div>
-            <button class="logout" onclick="cikisYap()">Çıkış</button>
+    <div class="card">
+        <h2>Ürünler</h2>
+        <table id="urunTable">
+            <thead><tr><th>Kod</th><th>Ürün</th><th>Alış</th><th>Satış</th><th>Stok</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
+
+<section id="satislar" class="view">
+    <div class="card">
+        <h2>Satış Ekle</h2>
+        <div class="form-grid">
+            <input id="satis_tarih" placeholder="Tarih GG.AA.YYYY">
+            <select id="satis_pazaryeri"></select>
+            <select id="satis_urun"></select>
+            <input id="satis_adet" type="number" placeholder="Adet">
+            <input id="satis_fiyat" type="number" placeholder="Satış Fiyatı">
+            <input id="kdv_orani" type="number" placeholder="KDV %">
+            <input id="kargo_ucreti" type="number" placeholder="Kargo">
+            <input id="net_kazanc" type="number" placeholder="Net Kazanç">
         </div>
+        <button class="btn" onclick="satisEkle()">Satış Ekle</button>
+    </div>
 
-        <section id="dashboard" class="view active">
-            <div class="grid">
-                <div class="card"><div class="stat-title">Toplam Sipariş</div><div class="stat-value" id="toplamSiparis">0</div></div>
-                <div class="card"><div class="stat-title">Toplam Adet</div><div class="stat-value" id="toplamAdet">0</div></div>
-                <div class="card"><div class="stat-title">Toplam Kazanç</div><div class="stat-value" id="toplamKazanc">0 ₺</div></div>
-                <div class="card"><div class="stat-title">Pazaryeri</div><div class="stat-value" id="pazaryeriSayisi">0</div></div>
-            </div>
+    <div class="card">
+        <h2>Satışlar</h2>
+        <table id="satisTable">
+            <thead><tr><th>Tarih</th><th>Pazar</th><th>Ürün</th><th>Adet</th><th>Satış</th><th>Net Kazanç</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
 
-            <div class="card">
-                <h2>Pazaryeri Özeti</h2>
-                <table id="dashboardTable">
-                    <thead><tr><th>Pazaryeri</th><th>Sipariş</th><th>Adet</th><th>Toplam Kazanç</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
+<section id="pazaryerleri" class="view">
+    <div class="card">
+        <h2>Pazaryeri Ekle</h2>
+        <input id="pazaryeri_ad" placeholder="Pazaryeri adı">
+        <button class="btn" onclick="pazaryeriEkle()">Pazaryeri Ekle</button>
+    </div>
 
-        <section id="urunler" class="view">
-            <div class="card">
-                <h2>Ürünler</h2>
-                <table id="urunTable">
-                    <thead><tr><th>Kod</th><th>Ürün</th><th>Alış</th><th>Satış</th><th>Stok</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
+    <div class="card">
+        <h2>Pazaryerleri</h2>
+        <table id="pazarTable">
+            <thead><tr><th>ID</th><th>Ad</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
 
-        <section id="satislar" class="view">
-            <div class="card">
-                <h2>Satışlar</h2>
-                <table id="satisTable">
-                    <thead><tr><th>Tarih</th><th>Pazar</th><th>Ürün</th><th>Adet</th><th>Satış</th><th>Net Kazanç</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
+<section id="stok" class="view">
+    <div class="card">
+        <h2>Stok Takip</h2>
+        <table id="stokTable">
+            <thead><tr><th>Kod</th><th>Ürün</th><th>Stok</th><th>Alış</th><th>Satış</th></tr></thead>
+            <tbody></tbody>
+        </table>
+    </div>
+</section>
 
-        <section id="pazaryerleri" class="view">
-            <div class="card">
-                <h2>Pazaryerleri</h2>
-                <table id="pazarTable">
-                    <thead><tr><th>ID</th><th>Ad</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
+<section id="raporlar" class="view">
+    <div class="card">
+        <h2>Raporlar</h2>
+        <p>Rapor ekranı sonraki aşamada detaylandırılacak.</p>
+    </div>
+</section>
 
-        <section id="stok" class="view">
-            <div class="card">
-                <h2>Stok Takip</h2>
-                <table id="stokTable">
-                    <thead><tr><th>Kod</th><th>Ürün</th><th>Stok</th><th>Alış</th><th>Satış</th></tr></thead>
-                    <tbody></tbody>
-                </table>
-            </div>
-        </section>
-
-        <section id="raporlar" class="view">
-            <div class="card">
-                <h2>Raporlar</h2>
-                <p>Rapor ekranı sonraki aşamada detaylandırılacak.</p>
-            </div>
-        </section>
-    </main>
+</main>
 </div>
 
 <script>
 function login(){
-    const username = document.getElementById("username").value;
-    const password = document.getElementById("password").value;
-
-    if(username === "isurgit" && password === "9876"){
+    if(username.value==="isurgit" && password.value==="9876"){
         localStorage.setItem("verauraLogin","true");
         panelAc();
     }else{
-        document.getElementById("errorBox").style.display = "block";
+        errorBox.style.display="block";
     }
 }
 
 function panelAc(){
-    document.getElementById("loginPage").style.display = "none";
-    document.getElementById("panel").style.display = "flex";
+    loginPage.style.display="none";
+    panel.style.display="flex";
     dashboardGetir();
+    urunleriGetir();
+    pazaryerleriniGetir();
 }
 
 function cikisYap(){
@@ -215,116 +198,142 @@ function cikisYap(){
     location.reload();
 }
 
-function sayfaAc(id, btn){
-    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+function sayfaAc(id,btn){
+    document.querySelectorAll(".view").forEach(v=>v.classList.remove("active"));
     document.getElementById(id).classList.add("active");
-
-    document.querySelectorAll(".menu button").forEach(b => b.classList.remove("active"));
+    document.querySelectorAll(".menu button").forEach(b=>b.classList.remove("active"));
     btn.classList.add("active");
+    sayfaBaslik.innerText=btn.innerText;
+    sayfaAltBaslik.innerText=btn.innerText+" ekranı";
 
-    document.getElementById("sayfaBaslik").innerText = btn.innerText;
-    document.getElementById("sayfaAltBaslik").innerText = btn.innerText + " ekranı";
+    if(id==="dashboard") dashboardGetir();
+    if(id==="urunler") urunleriGetir();
+    if(id==="satislar"){ satislariGetir(); urunleriGetir(); pazaryerleriniGetir(); }
+    if(id==="pazaryerleri") pazaryerleriniGetir();
+    if(id==="stok") stokGetir();
+}
 
-    if(id === "urunler") urunleriGetir();
-    if(id === "satislar") satislariGetir();
-    if(id === "pazaryerleri") pazaryerleriniGetir();
-    if(id === "stok") stokGetir();
+function tarihCevir(tarih){
+    const p=tarih.split(".");
+    if(p.length!==3) return tarih;
+    return `${p[2]}-${p[1]}-${p[0]}`;
+}
+
+async function urunEkle(){
+    await fetch("/urun-ekle",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            urun_kodu:urun_kodu.value,
+            urun_adi:urun_adi.value,
+            alis_fiyati:alis_fiyati.value,
+            satis_fiyati:satis_fiyati.value,
+            stok:stok.value
+        })
+    });
+    alert("Ürün eklendi");
+    urunleriGetir();
+}
+
+async function pazaryeriEkle(){
+    await fetch("/pazaryeri-ekle",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({ad:pazaryeri_ad.value})
+    });
+    alert("Pazaryeri eklendi");
+    pazaryerleriniGetir();
+}
+
+async function satisEkle(){
+    await fetch("/satis-ekle",{
+        method:"POST",
+        headers:{"Content-Type":"application/json"},
+        body:JSON.stringify({
+            tarih:tarihCevir(satis_tarih.value),
+            pazaryeri_id:satis_pazaryeri.value,
+            urun_id:satis_urun.value,
+            adet:satis_adet.value,
+            satis_fiyati:satis_fiyat.value,
+            kdv_orani:kdv_orani.value,
+            kargo_ucreti:kargo_ucreti.value,
+            net_kazanc:net_kazanc.value
+        })
+    });
+    alert("Satış eklendi");
+    satislariGetir();
+    dashboardGetir();
 }
 
 async function dashboardGetir(){
-    const response = await fetch("/dashboard");
-    const result = await response.json();
-    const tbody = document.querySelector("#dashboardTable tbody");
-    tbody.innerHTML = "";
+    const r=await fetch("/dashboard");
+    const j=await r.json();
+    const tbody=document.querySelector("#dashboardTable tbody");
+    tbody.innerHTML="";
+    let siparis=0,adet=0,kazanc=0;
 
-    let siparis = 0, adet = 0, kazanc = 0;
-
-    result.data.forEach(item => {
-        siparis += Number(item.siparis_sayisi);
-        adet += Number(item.toplam_adet);
-        kazanc += Number(item.toplam_kazanc);
-
-        tbody.innerHTML += `
-            <tr>
-                <td>${item.pazaryeri}</td>
-                <td>${item.siparis_sayisi}</td>
-                <td>${item.toplam_adet}</td>
-                <td class="kazanc">${Number(item.toplam_kazanc).toLocaleString("tr-TR")} ₺</td>
-            </tr>`;
+    j.data.forEach(x=>{
+        siparis+=Number(x.siparis_sayisi);
+        adet+=Number(x.toplam_adet);
+        kazanc+=Number(x.toplam_kazanc);
+        tbody.innerHTML+=`<tr><td>${x.pazaryeri}</td><td>${x.siparis_sayisi}</td><td>${x.toplam_adet}</td><td class="kazanc">${Number(x.toplam_kazanc).toLocaleString("tr-TR")} ₺</td></tr>`;
     });
 
-    document.getElementById("toplamSiparis").innerText = siparis;
-    document.getElementById("toplamAdet").innerText = adet;
-    document.getElementById("toplamKazanc").innerText = kazanc.toLocaleString("tr-TR") + " ₺";
-    document.getElementById("pazaryeriSayisi").innerText = result.data.length;
+    toplamSiparis.innerText=siparis;
+    toplamAdet.innerText=adet;
+    toplamKazanc.innerText=kazanc.toLocaleString("tr-TR")+" ₺";
+    pazaryeriSayisi.innerText=j.data.length;
 }
 
 async function urunleriGetir(){
-    const r = await fetch("/urunler");
-    const j = await r.json();
-    const tbody = document.querySelector("#urunTable tbody");
-    tbody.innerHTML = "";
+    const r=await fetch("/urunler");
+    const j=await r.json();
+    const tbody=document.querySelector("#urunTable tbody");
+    tbody.innerHTML="";
+    satis_urun.innerHTML="<option value=''>Ürün Seç</option>";
 
-    j.data.forEach(x => {
-        tbody.innerHTML += `<tr>
-            <td>${x.urun_kodu}</td>
-            <td>${x.urun_adi}</td>
-            <td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td>
-            <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
-            <td>${x.stok}</td>
-        </tr>`;
+    j.data.forEach(x=>{
+        tbody.innerHTML+=`<tr><td>${x.urun_kodu}</td><td>${x.urun_adi}</td><td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td><td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td><td>${x.stok}</td></tr>`;
+        satis_urun.innerHTML+=`<option value="${x.id}">${x.urun_adi}</option>`;
     });
 }
 
 async function satislariGetir(){
-    const r = await fetch("/satislar");
-    const j = await r.json();
-    const tbody = document.querySelector("#satisTable tbody");
-    tbody.innerHTML = "";
+    const r=await fetch("/satislar");
+    const j=await r.json();
+    const tbody=document.querySelector("#satisTable tbody");
+    tbody.innerHTML="";
 
-    j.data.forEach(x => {
-        tbody.innerHTML += `<tr>
-            <td>${String(x.tarih).substring(0,10)}</td>
-            <td>${x.pazaryeri}</td>
-            <td>${x.urun_adi}</td>
-            <td>${x.adet}</td>
-            <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
-            <td class="kazanc">${Number(x.net_kazanc).toLocaleString("tr-TR")} ₺</td>
-        </tr>`;
+    j.data.forEach(x=>{
+        tbody.innerHTML+=`<tr><td>${String(x.tarih).substring(0,10)}</td><td>${x.pazaryeri}</td><td>${x.urun_adi}</td><td>${x.adet}</td><td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td><td class="kazanc">${Number(x.net_kazanc).toLocaleString("tr-TR")} ₺</td></tr>`;
     });
 }
 
 async function pazaryerleriniGetir(){
-    const r = await fetch("/pazaryerleri");
-    const j = await r.json();
-    const tbody = document.querySelector("#pazarTable tbody");
-    tbody.innerHTML = "";
+    const r=await fetch("/pazaryerleri");
+    const j=await r.json();
+    const tbody=document.querySelector("#pazarTable tbody");
+    tbody.innerHTML="";
+    satis_pazaryeri.innerHTML="<option value=''>Pazaryeri Seç</option>";
 
-    j.data.forEach(x => {
-        tbody.innerHTML += `<tr><td>${x.id}</td><td>${x.ad}</td></tr>`;
+    j.data.forEach(x=>{
+        tbody.innerHTML+=`<tr><td>${x.id}</td><td>${x.ad}</td></tr>`;
+        satis_pazaryeri.innerHTML+=`<option value="${x.id}">${x.ad}</option>`;
     });
 }
 
 async function stokGetir(){
-    const r = await fetch("/stok");
-    const j = await r.json();
-    const tbody = document.querySelector("#stokTable tbody");
-    tbody.innerHTML = "";
+    const r=await fetch("/stok");
+    const j=await r.json();
+    const tbody=document.querySelector("#stokTable tbody");
+    tbody.innerHTML="";
 
-    j.data.forEach(x => {
-        tbody.innerHTML += `<tr>
-            <td>${x.urun_kodu}</td>
-            <td>${x.urun_adi}</td>
-            <td>${x.stok}</td>
-            <td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td>
-            <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
-        </tr>`;
+    j.data.forEach(x=>{
+        tbody.innerHTML+=`<tr><td>${x.urun_kodu}</td><td>${x.urun_adi}</td><td>${x.stok}</td><td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td><td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td></tr>`;
     });
 }
 
-if(localStorage.getItem("verauraLogin") === "true"){
-    panelAc();
-}
+if(localStorage.getItem("verauraLogin")==="true") panelAc();
 </script>
 
 </body>
