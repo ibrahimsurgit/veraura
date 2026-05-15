@@ -166,8 +166,17 @@ th{background:#f8fafc;color:#475569}
 <section id="stok" class="view">
     <div class="card">
         <h2>Stok Takip</h2>
+
         <table id="stokTable">
-            <thead><tr><th>Kod</th><th>Ürün</th><th>Stok</th><th>Alış</th><th>Satış</th></tr></thead>
+            <thead>
+                <tr>
+                    <th>Kod</th>
+                    <th>Ürün</th>
+                    <th>Stok</th>
+                    <th>Alış</th>
+                    <th>Satış</th>
+                </tr>
+            </thead>
             <tbody></tbody>
         </table>
     </div>
@@ -362,13 +371,22 @@ async function pazaryerleriniGetir(){
 }
 
 async function stokGetir(){
-    const r=await fetch("/stok");
-    const j=await r.json();
-    const tbody=document.querySelector("#stokTable tbody");
-    tbody.innerHTML="";
+    const r = await fetch("/stok");
+    const j = await r.json();
 
-    j.data.forEach(x=>{
-        tbody.innerHTML+=`<tr><td>${x.urun_kodu}</td><td>${x.urun_adi}</td><td>${x.stok}</td><td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td><td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td></tr>`;
+    const tbody = document.querySelector("#stokTable tbody");
+    tbody.innerHTML = "";
+
+    j.data.forEach(x => {
+        tbody.innerHTML += `
+            <tr>
+                <td>${x.urun_kodu}</td>
+                <td>${x.urun_adi}</td>
+                <td>${x.stok}</td>
+                <td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td>
+                <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
+            </tr>
+        `;
     });
 }
 
