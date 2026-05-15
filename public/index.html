@@ -4,6 +4,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VERAURA PANEL</title>
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 
 <style>
 *{box-sizing:border-box}
@@ -82,6 +83,13 @@ th{background:#f8fafc;color:#475569}
         <div class="card"><div class="stat-title">Toplam Kazanç</div><div class="stat-value" id="toplamKazanc">0 ₺</div></div>
         <div class="card"><div class="stat-title">Pazaryeri</div><div class="stat-value" id="pazaryeriSayisi">0</div></div>
     </div>
+
+<div class="card">
+    <h2>Pazaryeri Kazanç Grafiği</h2>
+    <div style="height:320px">
+        <canvas id="pazaryeriChart"></canvas>
+    </div>
+</div>
 
     <div class="card">
         <h2>Pazaryeri Özeti</h2>
@@ -283,6 +291,37 @@ async function dashboardGetir(){
     toplamAdet.innerText=adet;
     toplamKazanc.innerText=kazanc.toLocaleString("tr-TR")+" ₺";
     pazaryeriSayisi.innerText=j.data.length;
+const labels = [];
+const values = [];
+
+j.data.forEach(x => {
+    labels.push(x.pazaryeri);
+    values.push(Number(
+        String(x.toplam_kazanc)
+        .replace(/\./g, "")
+        .replace(",", ".")
+    ));
+});
+
+const ctx = document.getElementById("pazaryeriChart");
+
+if(window.pazaryeriChartObj){
+    window.pazaryeriChartObj.destroy();
+}
+
+window.pazaryeriChartObj = new Chart(ctx, {
+    type: "doughnut",
+    data: {
+        labels: labels,
+        datasets: [{
+            data: values
+        }]
+    },
+    options: {
+        responsive: true,
+        maintainAspectRatio: false
+    }
+});
 }
 
 async function urunleriGetir(){
