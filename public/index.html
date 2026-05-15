@@ -12,7 +12,14 @@
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 body{background:#e9ebf1}
 .login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#020617,#111827)}
-.login-box{width:390px;background:#0f172a;border-radius:22px;padding:35px;box-shadow:0 0 40px rgba(255,0,183,.25);border:1px solid rgba(255,0,183,.35)}
+.login-box{
+    width:460px;
+    background:#0f172a;
+    border-radius:22px;
+    padding:35px;
+    box-shadow:0 0 40px rgba(255,0,183,.25);
+    border:1px solid rgba(255,215,0,.25);
+}
 .login-logo{text-align:center;color:#ff00b7;font-size:36px;font-weight:bold;margin-bottom:8px}
 .login-sub{text-align:center;color:#94a3b8;margin-bottom:28px}
 .login-box input{background:#1e293b;color:#fff;border:none}
@@ -54,16 +61,29 @@ canvas{width:100%!important;height:100%!important}
 
 <div class="login-page" id="loginPage">
     <div class="login-box">
-        <div class="login-logo">VERAURA</div>
-        <div class="login-sub">Satış & Stok Takip Paneli</div>
 
-        <input type="text" id="loginUser" placeholder="Kullanıcı adı">
-        <input type="password" id="loginPass" placeholder="Şifre">
-
-        <button class="action-btn" onclick="login()">Giriş Yap</button>
-
-        <div class="error" id="loginError">Kullanıcı adı veya şifre hatalı</div>
+    <div style="text-align:center;margin-bottom:25px;">
+        <img src="veraura.png"
+             style="
+                width:320px;
+                max-width:100%;
+                object-fit:contain;
+                filter:drop-shadow(0 0 25px rgba(255,215,0,.35));
+             ">
     </div>
+
+    <input type="text" id="loginUser" placeholder="Kullanıcı adı">
+
+    <input type="password" id="loginPass" placeholder="Şifre">
+
+    <button class="action-btn" onclick="login()">
+        Giriş Yap
+    </button>
+
+    <div class="error" id="loginError">
+        Kullanıcı adı veya şifre hatalı
+    </div>
+
 </div>
 
 <div class="container" id="panel">
