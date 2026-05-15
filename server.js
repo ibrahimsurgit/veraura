@@ -322,20 +322,25 @@ app.get("/stok", (req, res) => {
             id,
             urun_kodu,
             urun_adi,
-            stok,
-            alis_fiyati,
-            satis_fiyati,
-            aktif
+            COALESCE(stok, 0) AS stok,
+            COALESCE(alis_fiyati, 0) AS alis_fiyati,
+            COALESCE(satis_fiyati, 0) AS satis_fiyati
         FROM urunler
         ORDER BY urun_adi ASC
     `;
 
     db.query(sql, (err, results) => {
         if (err) {
-            return res.status(500).json({ success: false, error: err.message });
+            return res.status(500).json({
+                success: false,
+                error: err.message
+            });
         }
 
-        res.json({ success: true, data: results });
+        res.json({
+            success: true,
+            data: results
+        });
     });
 });
 
