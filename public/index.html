@@ -354,11 +354,10 @@ async function urunGuncelle(id){
 async function urunSil(id){
     if(!confirm("Ürün silinsin mi?")) return;
 
-    const r = await fetch("/urun-sil/" + id,{method:"DELETE"});
+    const r = await fetch("/urun-sil/" + id, { method:"DELETE" });
     const j = await r.json();
 
     alert(j.message || j.error);
-
     urunleriGetir();
     stokGetir();
 }
@@ -443,11 +442,10 @@ async function pazaryeriGuncelle(id){
 async function pazaryeriSil(id){
     if(!confirm("Pazaryeri silinsin mi?")) return;
 
-    const r = await fetch("/pazaryeri-sil/" + id,{method:"DELETE"});
+    const r = await fetch("/pazaryeri-sil/" + id, { method:"DELETE" });
     const j = await r.json();
 
     alert(j.message || j.error);
-
     pazaryerleriGetir();
     dashboardGetir();
 }
@@ -575,11 +573,10 @@ async function satisGuncelle(id){
 async function satisSil(id){
     if(!confirm("Satış silinsin mi?")) return;
 
-    const r = await fetch("/satis-sil/" + id,{method:"DELETE"});
+    const r = await fetch("/satis-sil/" + id, { method:"DELETE" });
     const j = await r.json();
 
     alert(j.message || j.error);
-
     satislariGetir();
     stokGetir();
     dashboardGetir();
