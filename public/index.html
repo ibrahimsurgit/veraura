@@ -7,16 +7,112 @@
 <title>VERAURA PANEL</title>
 
 <style>
+*{
+    box-sizing:border-box;
+}
 
 body{
     margin:0;
-    padding:30px;
-    background:#f3f4f6;
-    font-family:Arial;
+    font-family:Arial, sans-serif;
+    background:#0b0b10;
+    color:#fff;
 }
 
-h1{
+.login-page{
+    min-height:100vh;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    background:
+        radial-gradient(circle at top, rgba(255,0,180,0.25), transparent 35%),
+        linear-gradient(135deg,#050505,#151522);
+}
+
+.login-box{
+    width:380px;
+    background:rgba(0,0,0,0.75);
+    border:1px solid rgba(255,0,180,0.35);
+    border-radius:20px;
+    padding:35px;
+    box-shadow:0 0 35px rgba(255,0,180,0.25);
+}
+
+.logo{
+    text-align:center;
+    font-size:34px;
+    font-weight:bold;
+    color:#ff00b8;
+    margin-bottom:8px;
+}
+
+.subtitle{
+    text-align:center;
+    color:#aaa;
     margin-bottom:30px;
+}
+
+input{
+    width:100%;
+    padding:14px;
+    margin-bottom:14px;
+    border:none;
+    border-radius:10px;
+    background:#1e1e2a;
+    color:#fff;
+    outline:none;
+}
+
+button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#ff00b8;
+    color:#fff;
+    font-weight:bold;
+    cursor:pointer;
+}
+
+button:hover{
+    background:#d9009d;
+}
+
+.error{
+    color:#ff6b6b;
+    text-align:center;
+    margin-top:15px;
+    display:none;
+}
+
+.panel{
+    display:none;
+    min-height:100vh;
+    background:#f3f4f6;
+    color:#111;
+}
+
+.header{
+    background:#111;
+    color:#fff;
+    padding:18px 28px;
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+}
+
+.header-title{
+    font-weight:bold;
+    color:#ff00b8;
+}
+
+.logout{
+    width:auto;
+    padding:9px 16px;
+    background:#333;
+}
+
+.content{
+    padding:30px;
 }
 
 .card{
@@ -46,61 +142,98 @@ th{
     color:green;
     font-weight:bold;
 }
-
 </style>
-
 </head>
+
 <body>
 
-<h1>VERAURA DASHBOARD</h1>
+<div class="login-page" id="loginPage">
+    <div class="login-box">
+        <div class="logo">VERAURA</div>
+        <div class="subtitle">Satış & Stok Takip Paneli</div>
 
-<div class="card">
-    <h2>Dashboard</h2>
+        <input type="text" id="username" placeholder="Kullanıcı adı">
+        <input type="password" id="password" placeholder="Şifre">
 
-    <table id="dashboardTable">
-        <thead>
-            <tr>
-                <th>Pazaryeri</th>
-                <th>Sipariş</th>
-                <th>Adet</th>
-                <th>Toplam Kazanç</th>
-            </tr>
-        </thead>
+        <button onclick="login()">Giriş Yap</button>
 
-        <tbody></tbody>
-    </table>
+        <div class="error" id="errorBox">Kullanıcı adı veya şifre hatalı</div>
+    </div>
+</div>
+
+<div class="panel" id="panel">
+    <div class="header">
+        <div class="header-title">VERAURA PANEL</div>
+        <button class="logout" onclick="logout()">Çıkış</button>
+    </div>
+
+    <div class="content">
+        <h1>Dashboard</h1>
+
+        <div class="card">
+            <h2>Pazaryeri Özeti</h2>
+
+            <table id="dashboardTable">
+                <thead>
+                    <tr>
+                        <th>Pazaryeri</th>
+                        <th>Sipariş</th>
+                        <th>Adet</th>
+                        <th>Toplam Kazanç</th>
+                    </tr>
+                </thead>
+                <tbody></tbody>
+            </table>
+        </div>
+    </div>
 </div>
 
 <script>
+function login(){
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if(username === "admin" && password === "12345"){
+        localStorage.setItem("verauraLogin", "true");
+        panelAc();
+    }else{
+        document.getElementById("errorBox").style.display = "block";
+    }
+}
+
+function logout(){
+    localStorage.removeItem("verauraLogin");
+    location.reload();
+}
+
+function panelAc(){
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("panel").style.display = "block";
+    dashboardGetir();
+}
 
 async function dashboardGetir(){
-
     const response = await fetch("/dashboard");
     const result = await response.json();
 
     const tbody = document.querySelector("#dashboardTable tbody");
-
     tbody.innerHTML = "";
 
     result.data.forEach(item => {
-
         tbody.innerHTML += `
             <tr>
                 <td>${item.pazaryeri}</td>
                 <td>${item.siparis_sayisi}</td>
                 <td>${item.toplam_adet}</td>
-                <td class="kazanc">
-                    ${Number(item.toplam_kazanc).toLocaleString("tr-TR")} ₺
-                </td>
+                <td class="kazanc">${Number(item.toplam_kazanc).toLocaleString("tr-TR")} ₺</td>
             </tr>
         `;
-
     });
-
 }
 
-dashboardGetir();
-
+if(localStorage.getItem("verauraLogin") === "true"){
+    panelAc();
+}
 </script>
 
 </body>
