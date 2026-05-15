@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+<title>VERAURA PANEL</title>
+
+<style>
+
+body{
+    margin:0;
+    padding:30px;
+    background:#f3f4f6;
+    font-family:Arial;
+}
+
+h1{
+    margin-bottom:30px;
+}
+
+.card{
+    background:white;
+    padding:20px;
+    border-radius:12px;
+    margin-bottom:20px;
+    box-shadow:0 2px 10px rgba(0,0,0,0.08);
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th, td{
+    padding:12px;
+    border-bottom:1px solid #ddd;
+    text-align:left;
+}
+
+th{
+    background:#fafafa;
+}
+
+.kazanc{
+    color:green;
+    font-weight:bold;
+}
+
+</style>
+
+</head>
+<body>
+
+<h1>VERAURA DASHBOARD</h1>
+
+<div class="card">
+    <h2>Dashboard</h2>
+
+    <table id="dashboardTable">
+        <thead>
+            <tr>
+                <th>Pazaryeri</th>
+                <th>Sipariş</th>
+                <th>Adet</th>
+                <th>Toplam Kazanç</th>
+            </tr>
+        </thead>
+
+        <tbody></tbody>
+    </table>
+</div>
+
+<script>
+
+async function dashboardGetir(){
+
+    const response = await fetch("/dashboard");
+    const result = await response.json();
+
+    const tbody = document.querySelector("#dashboardTable tbody");
+
+    tbody.innerHTML = "";
+
+    result.data.forEach(item => {
+
+        tbody.innerHTML += `
+            <tr>
+                <td>${item.pazaryeri}</td>
+                <td>${item.siparis_sayisi}</td>
+                <td>${item.toplam_adet}</td>
+                <td class="kazanc">
+                    ${Number(item.toplam_kazanc).toLocaleString("tr-TR")} ₺
+                </td>
+            </tr>
+        `;
+
+    });
+
+}
+
+dashboardGetir();
+
+</script>
+
+</body>
+</html>
