@@ -232,14 +232,13 @@ app.post("/satis-ekle", (req, res) => {
         adet,
         satis_fiyati,
         kdv_orani,
-        kargo_ucreti,
-        net_kazanc
+        kargo_ucreti
     } = req.body;
 
-    if (!tarih || !pazaryeri_id || !urun_id) {
+    if (!tarih || !pazaryeri_id || !urun_id || !adet || !satis_fiyati) {
         return res.status(400).json({
             success: false,
-            message: "Tarih, pazaryeri ve ürün zorunlu"
+            message: "Tarih, pazaryeri, ürün, adet ve satış fiyatı zorunlu"
         });
     }
 
@@ -250,36 +249,99 @@ app.post("/satis-ekle", (req, res) => {
         mysqlTarih = `${parca[2]}-${parca[1]}-${parca[0]}`;
     }
 
-    const sql = `
-        INSERT INTO satislar
-        (tarih, pazaryeri_id, urun_id, adet, satis_fiyati, kdv_orani, kargo_ucreti, net_kazanc)
-        VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    db.query(sql, [
-        mysqlTarih,
-        pazaryeri_id,
-        urun_id,
-        adet || 1,
-        satis_fiyati || 0,
-        kdv_orani || 0,
-        kargo_ucreti || 0,
-        net_kazanc || 0
-    ], (err, result) => {
+    db.beginTransaction((err) => {
         if (err) {
-            return res.status(500).json({
-                success: false,
-                error: err
-            });
+            return res.status(500).json({ success: false, error: err });
         }
 
-        res.json({
-            success: true,
-            message: "Satış başarıyla eklendi",
-            insert_id: result.insertId
-        });
+        db.query(
+            "SELECT alis_fiyati, stok FROM urunler WHERE id = ?",
+            [urun_id],
+            (err, urunResult) => {
+                if (err || urunResult.length === 0) {
+                    return db.rollback(() => {
+                        res.status(500).json({
+                            success: false,
+                            message: "Ürün bulunamadı",
+                            error: err
+                        });
+                    });
+                }
+
+                const alisFiyati = Number(urunResult[0].alis_fiyati);
+                const mevcutStok = Number(urunResult[0].stok);
+                const satisAdet = Number(adet);
+
+                if (mevcutStok < satisAdet) {
+                    return db.rollback(() => {
+                        res.status(400).json({
+                            success: false,
+                            message: "Yetersiz stok"
+                        });
+                    });
+                }
+
+                const toplamSatis = Number(satis_fiyati) * satisAdet;
+                const toplamAlis = alisFiyati * satisAdet;
+                const kdvTutar = toplamSatis * (Number(kdv_orani || 0) / 100);
+                const kargo = Number(kargo_ucreti || 0);
+
+                const hesaplananNetKazanc = toplamSatis - toplamAlis - kdvTutar - kargo;
+
+                const sql = `
+                    INSERT INTO satislar
+                    (tarih, pazaryeri_id, urun_id, adet, satis_fiyati, kdv_orani, kargo_ucreti, net_kazanc)
+                    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+                `;
+
+                db.query(sql, [
+                    mysqlTarih,
+                    pazaryeri_id,
+                    urun_id,
+                    satisAdet,
+                    satis_fiyati,
+                    kdv_orani || 0,
+                    kargo,
+                    hesaplananNetKazanc
+                ], (err, result) => {
+                    if (err) {
+                        return db.rollback(() => {
+                            res.status(500).json({ success: false, error: err });
+                        });
+                    }
+
+                    db.query(
+                        "UPDATE urunler SET stok = stok - ? WHERE id = ?",
+                        [satisAdet, urun_id],
+                        (err) => {
+                            if (err) {
+                                return db.rollback(() => {
+                                    res.status(500).json({ success: false, error: err });
+                                });
+                            }
+
+                            db.commit((err) => {
+                                if (err) {
+                                    return db.rollback(() => {
+                                        res.status(500).json({ success: false, error: err });
+                                    });
+                                }
+
+                                res.json({
+                                    success: true,
+                                    message: "Satış eklendi, stok düşüldü",
+                                    insert_id: result.insertId,
+                                    net_kazanc: hesaplananNetKazanc
+                                });
+                            });
+                        }
+                    );
+                });
+            }
+        );
     });
 });
+
 
 app.get("/stok", (req, res) => {
     const sql = `
