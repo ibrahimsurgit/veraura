@@ -4,18 +4,28 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>VERAURA PANEL</title>
-
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+<!-- batuhanelmaci.com -->
 
 <style>
 *{margin:0;padding:0;box-sizing:border-box;font-family:Arial}
 body{background:#e9ebf1}
-.container{display:flex;min-height:100vh}
+.login-page{min-height:100vh;display:flex;align-items:center;justify-content:center;background:linear-gradient(135deg,#020617,#111827)}
+.login-box{width:390px;background:#0f172a;border-radius:22px;padding:35px;box-shadow:0 0 40px rgba(255,0,183,.25);border:1px solid rgba(255,0,183,.35)}
+.login-logo{text-align:center;color:#ff00b7;font-size:36px;font-weight:bold;margin-bottom:8px}
+.login-sub{text-align:center;color:#94a3b8;margin-bottom:28px}
+.login-box input{background:#1e293b;color:#fff;border:none}
+.login-box button{width:100%;margin-top:5px}
+.error{display:none;color:#ff6b6b;text-align:center;margin-top:15px}
+
+.container{display:none;min-height:100vh}
 .sidebar{width:220px;background:#07122d;padding:20px}
 .logo{color:#ff00b7;font-size:28px;font-weight:bold;margin-bottom:40px}
 .menu button{width:100%;padding:14px;margin-bottom:10px;border:none;border-radius:12px;background:transparent;color:#fff;text-align:left;cursor:pointer;font-size:16px}
-.menu button:hover{background:#18284d}
+.menu button:hover,.menu button.active{background:#18284d}
 .content{flex:1;padding:20px}
+.topbar{background:#fff;border-radius:18px;padding:18px 20px;margin-bottom:20px;display:flex;justify-content:space-between;align-items:center}
 .card{background:#fff;border-radius:18px;padding:20px;margin-bottom:20px}
 .cards{display:grid;grid-template-columns:repeat(4,1fr);gap:20px;margin-bottom:20px}
 .stat{background:#fff;border-radius:18px;padding:20px}
@@ -25,6 +35,7 @@ table th{background:#f5f5f5;padding:14px;text-align:left}
 table td{padding:14px;border-bottom:1px solid #eee}
 input,select{width:100%;padding:14px;border:1px solid #ddd;border-radius:10px;margin-bottom:10px}
 .action-btn{padding:12px 20px;border:none;border-radius:10px;background:#ff00b7;color:#fff;cursor:pointer}
+.logout-btn{padding:10px 16px;border:none;border-radius:10px;background:#07122d;color:#fff;cursor:pointer}
 .delete-btn{padding:8px 14px;border:none;border-radius:8px;background:#ff3b3b;color:#fff;cursor:pointer;margin-left:5px}
 .edit-btn{padding:8px 14px;border:none;border-radius:8px;background:#2563eb;color:#fff;cursor:pointer}
 .view{display:none}
@@ -41,21 +52,43 @@ canvas{width:100%!important;height:100%!important}
 
 <body>
 
-<div class="container">
+<div class="login-page" id="loginPage">
+    <div class="login-box">
+        <div class="login-logo">VERAURA</div>
+        <div class="login-sub">Satış & Stok Takip Paneli</div>
+
+        <input type="text" id="loginUser" placeholder="Kullanıcı adı">
+        <input type="password" id="loginPass" placeholder="Şifre">
+
+        <button class="action-btn" onclick="login()">Giriş Yap</button>
+
+        <div class="error" id="loginError">Kullanıcı adı veya şifre hatalı</div>
+    </div>
+</div>
+
+<div class="container" id="panel">
 
     <div class="sidebar">
         <div class="logo">VERAURA</div>
 
         <div class="menu">
-            <button onclick="sayfaAc('dashboard')">Dashboard</button>
-            <button onclick="sayfaAc('urunler')">Ürünler</button>
-            <button onclick="sayfaAc('satislar')">Satışlar</button>
-            <button onclick="sayfaAc('pazaryerleri')">Pazaryerleri</button>
-            <button onclick="sayfaAc('stok')">Stok</button>
+            <button class="active" onclick="sayfaAc('dashboard',this)">Dashboard</button>
+            <button onclick="sayfaAc('urunler',this)">Ürünler</button>
+            <button onclick="sayfaAc('satislar',this)">Satışlar</button>
+            <button onclick="sayfaAc('pazaryerleri',this)">Pazaryerleri</button>
+            <button onclick="sayfaAc('stok',this)">Stok</button>
         </div>
     </div>
 
     <div class="content">
+
+        <div class="topbar">
+            <div>
+                <h2 id="sayfaBaslik">Dashboard</h2>
+                <small id="sayfaAlt">Satış ve stok takip özeti</small>
+            </div>
+            <button class="logout-btn" onclick="logout()">Çıkış</button>
+        </div>
 
         <section id="dashboard" class="view active">
             <div class="cards">
@@ -88,14 +121,7 @@ canvas{width:100%!important;height:100%!important}
                 <h2>Ürünler</h2>
                 <table id="urunTable">
                     <thead>
-                        <tr>
-                            <th>Kod</th>
-                            <th>Ürün</th>
-                            <th>Alış</th>
-                            <th>Satış</th>
-                            <th>Stok</th>
-                            <th>İşlem</th>
-                        </tr>
+                        <tr><th>Kod</th><th>Ürün</th><th>Alış</th><th>Satış</th><th>Stok</th><th>İşlem</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -119,15 +145,7 @@ canvas{width:100%!important;height:100%!important}
                 <h2>Satış Listesi</h2>
                 <table id="satisTable">
                     <thead>
-                        <tr>
-                            <th>Tarih</th>
-                            <th>Pazaryeri</th>
-                            <th>Ürün</th>
-                            <th>Adet</th>
-                            <th>Satış</th>
-                            <th>Kazanç</th>
-                            <th>İşlem</th>
-                        </tr>
+                        <tr><th>Tarih</th><th>Pazaryeri</th><th>Ürün</th><th>Adet</th><th>Satış</th><th>Kazanç</th><th>İşlem</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -145,11 +163,7 @@ canvas{width:100%!important;height:100%!important}
                 <h2>Pazaryerleri</h2>
                 <table id="pazaryeriTable">
                     <thead>
-                        <tr>
-                            <th>ID</th>
-                            <th>Ad</th>
-                            <th>İşlem</th>
-                        </tr>
+                        <tr><th>ID</th><th>Ad</th><th>İşlem</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -161,13 +175,7 @@ canvas{width:100%!important;height:100%!important}
                 <h2>Stok Takip</h2>
                 <table id="stokTable">
                     <thead>
-                        <tr>
-                            <th>Kod</th>
-                            <th>Ürün</th>
-                            <th>Stok</th>
-                            <th>Alış</th>
-                            <th>Satış</th>
-                        </tr>
+                        <tr><th>Kod</th><th>Ürün</th><th>Stok</th><th>Alış</th><th>Satış</th></tr>
                     </thead>
                     <tbody></tbody>
                 </table>
@@ -186,9 +194,35 @@ let urunData = [];
 let pazaryeriData = [];
 let satisData = [];
 
-function sayfaAc(id){
+function login(){
+    if(loginUser.value === "isurgit" && loginPass.value === "9876"){
+        localStorage.setItem("verauraLogin","true");
+        panelAc();
+    }else{
+        loginError.style.display = "block";
+    }
+}
+
+function panelAc(){
+    loginPage.style.display = "none";
+    panel.style.display = "flex";
+    dashboardGetir();
+}
+
+function logout(){
+    localStorage.removeItem("verauraLogin");
+    location.reload();
+}
+
+function sayfaAc(id,btn){
     document.querySelectorAll(".view").forEach(x => x.classList.remove("active"));
     document.getElementById(id).classList.add("active");
+
+    document.querySelectorAll(".menu button").forEach(x => x.classList.remove("active"));
+    btn.classList.add("active");
+
+    sayfaBaslik.innerText = btn.innerText;
+    sayfaAlt.innerText = btn.innerText + " ekranı";
 
     if(id === "dashboard") dashboardGetir();
     if(id === "urunler") urunleriGetir();
@@ -210,18 +244,13 @@ async function dashboardGetir(){
     const r = await fetch("/dashboard");
     const j = await r.json();
 
-    let siparis = 0;
-    let adet = 0;
-    let kazanc = 0;
-
-    const labels = [];
-    const values = [];
+    let siparis = 0, adet = 0, kazanc = 0;
+    const labels = [], values = [];
 
     j.data.forEach(x => {
         siparis += Number(x.siparis_sayisi);
         adet += Number(x.toplam_adet);
         kazanc += Number(x.toplam_kazanc);
-
         labels.push(x.pazaryeri);
         values.push(Number(x.toplam_kazanc));
     });
@@ -233,20 +262,12 @@ async function dashboardGetir(){
 
     const ctx = document.getElementById("pazaryeriChart");
 
-    if(window.chartObj){
-        window.chartObj.destroy();
-    }
+    if(window.chartObj) window.chartObj.destroy();
 
     window.chartObj = new Chart(ctx,{
         type:"doughnut",
-        data:{
-            labels:labels,
-            datasets:[{data:values}]
-        },
-        options:{
-            responsive:true,
-            maintainAspectRatio:false
-        }
+        data:{labels:labels,datasets:[{data:values}]},
+        options:{responsive:true,maintainAspectRatio:false}
     });
 }
 
@@ -281,7 +302,6 @@ async function urunleriGetir(){
     const j = await r.json();
 
     urunData = j.data;
-
     const tbody = document.querySelector("#urunTable tbody");
     tbody.innerHTML = "";
 
@@ -316,13 +336,11 @@ function urunDuzenleAc(id){
     modalBg.style.display = "flex";
     modalContent.innerHTML = `
         <h2>Ürün Düzenle</h2>
-
         <input id="duzenle_urun_kodu" value="${x.urun_kodu || ""}" placeholder="Ürün Kodu">
         <input id="duzenle_urun_adi" value="${x.urun_adi || ""}" placeholder="Ürün Adı">
         <input id="duzenle_alis_fiyati" type="number" value="${x.alis_fiyati || 0}" placeholder="Alış Fiyatı">
         <input id="duzenle_satis_fiyati" type="number" value="${x.satis_fiyati || 0}" placeholder="Satış Fiyatı">
         <input id="duzenle_stok" type="number" value="${x.stok || 0}" placeholder="Stok">
-
         <div class="modal-actions">
             <button class="cancel-btn" onclick="modalKapat()">Vazgeç</button>
             <button class="action-btn" onclick="urunGuncelle(${id})">Kaydet</button>
@@ -354,12 +372,14 @@ async function urunGuncelle(id){
 async function urunSil(id){
     if(!confirm("Ürün silinsin mi?")) return;
 
-    const r = await fetch("/urun-sil/" + id, { method:"DELETE" });
+    const r = await fetch("/urun-sil/" + id,{method:"DELETE"});
     const j = await r.json();
 
     alert(j.message || j.error);
+
     urunleriGetir();
     stokGetir();
+    dashboardGetir();
 }
 
 async function pazaryeriEkle(){
@@ -382,7 +402,6 @@ async function pazaryerleriGetir(){
     const j = await r.json();
 
     pazaryeriData = j.data;
-
     const tbody = document.querySelector("#pazaryeriTable tbody");
     tbody.innerHTML = "";
 
@@ -414,9 +433,7 @@ function pazaryeriDuzenleAc(id){
     modalBg.style.display = "flex";
     modalContent.innerHTML = `
         <h2>Pazaryeri Düzenle</h2>
-
         <input id="duzenle_pazaryeri_ad" value="${x.ad || ""}" placeholder="Pazaryeri adı">
-
         <div class="modal-actions">
             <button class="cancel-btn" onclick="modalKapat()">Vazgeç</button>
             <button class="action-btn" onclick="pazaryeriGuncelle(${id})">Kaydet</button>
@@ -442,10 +459,11 @@ async function pazaryeriGuncelle(id){
 async function pazaryeriSil(id){
     if(!confirm("Pazaryeri silinsin mi?")) return;
 
-    const r = await fetch("/pazaryeri-sil/" + id, { method:"DELETE" });
+    const r = await fetch("/pazaryeri-sil/" + id,{method:"DELETE"});
     const j = await r.json();
 
     alert(j.message || j.error);
+
     pazaryerleriGetir();
     dashboardGetir();
 }
@@ -484,7 +502,6 @@ async function satislariGetir(){
     const j = await r.json();
 
     satisData = j.data;
-
     const tbody = document.querySelector("#satisTable tbody");
     tbody.innerHTML = "";
 
@@ -511,26 +528,17 @@ function satisDuzenleAc(id){
 
     let pazaryeriOptions = "<option value=''>Pazaryeri Seç</option>";
     pazaryeriData.forEach(p => {
-        pazaryeriOptions += `
-            <option value="${p.id}" ${p.ad === x.pazaryeri ? "selected" : ""}>
-                ${p.ad}
-            </option>
-        `;
+        pazaryeriOptions += `<option value="${p.id}" ${p.ad === x.pazaryeri ? "selected" : ""}>${p.ad}</option>`;
     });
 
     let urunOptions = "<option value=''>Ürün Seç</option>";
     urunData.forEach(u => {
-        urunOptions += `
-            <option value="${u.id}" ${u.urun_adi === x.urun_adi ? "selected" : ""}>
-                ${u.urun_adi}
-            </option>
-        `;
+        urunOptions += `<option value="${u.id}" ${u.urun_adi === x.urun_adi ? "selected" : ""}>${u.urun_adi}</option>`;
     });
 
     modalBg.style.display = "flex";
     modalContent.innerHTML = `
         <h2>Satış Düzenle</h2>
-
         <input id="duzenle_satis_tarih" value="${x.tarih || ""}" placeholder="gg.aa.yyyy">
         <select id="duzenle_satis_pazaryeri">${pazaryeriOptions}</select>
         <select id="duzenle_satis_urun">${urunOptions}</select>
@@ -538,7 +546,6 @@ function satisDuzenleAc(id){
         <input id="duzenle_satis_fiyat" type="number" value="${x.satis_fiyati || 0}" placeholder="Satış Fiyatı">
         <input id="duzenle_satis_kdv" type="number" value="${x.kdv_orani || 0}" placeholder="KDV">
         <input id="duzenle_satis_kargo" type="number" value="${x.kargo_ucreti || 0}" placeholder="Kargo">
-
         <div class="modal-actions">
             <button class="cancel-btn" onclick="modalKapat()">Vazgeç</button>
             <button class="action-btn" onclick="satisGuncelle(${id})">Kaydet</button>
@@ -573,10 +580,11 @@ async function satisGuncelle(id){
 async function satisSil(id){
     if(!confirm("Satış silinsin mi?")) return;
 
-    const r = await fetch("/satis-sil/" + id, { method:"DELETE" });
+    const r = await fetch("/satis-sil/" + id,{method:"DELETE"});
     const j = await r.json();
 
     alert(j.message || j.error);
+
     satislariGetir();
     stokGetir();
     dashboardGetir();
@@ -602,7 +610,9 @@ async function stokGetir(){
     });
 }
 
-dashboardGetir();
+if(localStorage.getItem("verauraLogin") === "true"){
+    panelAc();
+}
 </script>
 
 </body>
