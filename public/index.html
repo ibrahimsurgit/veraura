@@ -3,212 +3,162 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>VERAURA PANEL</title>
 
 <style>
-*{
-    box-sizing:border-box;
-}
-
-body{
-    margin:0;
-    font-family:Arial, sans-serif;
-    background:#f4f6fb;
-    color:#111827;
-}
-
-.layout{
-    display:flex;
-    min-height:100vh;
-}
-
-.sidebar{
-    width:250px;
-    background:#0f172a;
-    color:white;
-    padding:22px;
-}
-
-.logo{
-    font-size:26px;
-    font-weight:bold;
-    color:#ff00b8;
-    margin-bottom:35px;
-}
-
-.menu button{
-    width:100%;
-    background:transparent;
-    color:#cbd5e1;
-    border:none;
-    padding:13px;
-    text-align:left;
-    border-radius:10px;
-    cursor:pointer;
-    margin-bottom:8px;
-    font-size:15px;
-}
-
-.menu button:hover,
-.menu button.active{
-    background:#1e293b;
-    color:white;
-}
-
-.main{
-    flex:1;
-    padding:28px;
-}
-
-.topbar{
-    background:white;
-    padding:18px 22px;
-    border-radius:16px;
-    margin-bottom:24px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
-    box-shadow:0 4px 16px rgba(0,0,0,0.06);
-}
-
-.card{
-    background:white;
-    border-radius:16px;
-    padding:22px;
-    box-shadow:0 4px 16px rgba(0,0,0,0.06);
-    margin-bottom:20px;
-}
-
-.grid{
-    display:grid;
-    grid-template-columns:repeat(4,1fr);
-    gap:18px;
-}
-
-.stat-title{
-    color:#64748b;
-    font-size:14px;
-}
-
-.stat-value{
-    font-size:26px;
-    font-weight:bold;
-    margin-top:8px;
-}
-
-table{
-    width:100%;
-    border-collapse:collapse;
-}
-
-th, td{
-    padding:13px;
-    border-bottom:1px solid #e5e7eb;
-    text-align:left;
-}
-
-th{
-    background:#f8fafc;
-    color:#475569;
-}
-
-.kazanc{
-    color:#16a34a;
-    font-weight:bold;
-}
-
-.logout{
-    background:#0f172a;
-    color:white;
-    border:none;
-    padding:10px 15px;
-    border-radius:10px;
-    cursor:pointer;
-}
+*{box-sizing:border-box}
+body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#111827}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:250px;background:#0f172a;color:white;padding:22px}
+.logo{font-size:26px;font-weight:bold;color:#ff00b8;margin-bottom:35px}
+.menu button{width:100%;background:transparent;color:#cbd5e1;border:none;padding:13px;text-align:left;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:15px}
+.menu button:hover,.menu button.active{background:#1e293b;color:white}
+.main{flex:1;padding:28px}
+.topbar{background:white;padding:18px 22px;border-radius:16px;margin-bottom:24px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 4px 16px rgba(0,0,0,.06)}
+.card{background:white;border-radius:16px;padding:22px;box-shadow:0 4px 16px rgba(0,0,0,.06);margin-bottom:20px}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:18px}
+.stat-title{color:#64748b;font-size:14px}
+.stat-value{font-size:26px;font-weight:bold;margin-top:8px}
+table{width:100%;border-collapse:collapse}
+th,td{padding:13px;border-bottom:1px solid #e5e7eb;text-align:left}
+th{background:#f8fafc;color:#475569}
+.kazanc{color:#16a34a;font-weight:bold}
+.logout{background:#0f172a;color:white;border:none;padding:10px 15px;border-radius:10px;cursor:pointer}
+.view{display:none}
+.view.active{display:block}
 </style>
 </head>
 
 <body>
 
 <div class="layout">
-
     <aside class="sidebar">
         <div class="logo">VERAURA</div>
 
         <div class="menu">
-            <button class="active">Dashboard</button>
-            <button>Ürünler</button>
-            <button>Satışlar</button>
-            <button>Pazaryerleri</button>
-            <button>Stok</button>
-            <button>Raporlar</button>
+            <button class="active" onclick="sayfaAc('dashboard', this)">Dashboard</button>
+            <button onclick="sayfaAc('urunler', this)">Ürünler</button>
+            <button onclick="sayfaAc('satislar', this)">Satışlar</button>
+            <button onclick="sayfaAc('pazaryerleri', this)">Pazaryerleri</button>
+            <button onclick="sayfaAc('stok', this)">Stok</button>
+            <button onclick="sayfaAc('raporlar', this)">Raporlar</button>
         </div>
     </aside>
 
     <main class="main">
         <div class="topbar">
             <div>
-                <strong>Dashboard</strong><br>
-                <small>Satış ve stok takip özeti</small>
+                <strong id="sayfaBaslik">Dashboard</strong><br>
+                <small id="sayfaAltBaslik">Satış ve stok takip özeti</small>
             </div>
-
-            <button class="logout">Çıkış</button>
+            <button class="logout" onclick="cikisYap()">Çıkış</button>
         </div>
 
-        <div class="grid">
-            <div class="card">
-                <div class="stat-title">Toplam Sipariş</div>
-                <div class="stat-value" id="toplamSiparis">0</div>
+        <section id="dashboard" class="view active">
+            <div class="grid">
+                <div class="card"><div class="stat-title">Toplam Sipariş</div><div class="stat-value" id="toplamSiparis">0</div></div>
+                <div class="card"><div class="stat-title">Toplam Adet</div><div class="stat-value" id="toplamAdet">0</div></div>
+                <div class="card"><div class="stat-title">Toplam Kazanç</div><div class="stat-value" id="toplamKazanc">0 ₺</div></div>
+                <div class="card"><div class="stat-title">Pazaryeri</div><div class="stat-value" id="pazaryeriSayisi">0</div></div>
             </div>
 
             <div class="card">
-                <div class="stat-title">Toplam Adet</div>
-                <div class="stat-value" id="toplamAdet">0</div>
+                <h2>Pazaryeri Özeti</h2>
+                <table id="dashboardTable">
+                    <thead>
+                        <tr><th>Pazaryeri</th><th>Sipariş</th><th>Adet</th><th>Toplam Kazanç</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
+        </section>
 
+        <section id="urunler" class="view">
             <div class="card">
-                <div class="stat-title">Toplam Kazanç</div>
-                <div class="stat-value" id="toplamKazanc">0 ₺</div>
+                <h2>Ürünler</h2>
+                <table id="urunTable">
+                    <thead>
+                        <tr><th>Kod</th><th>Ürün</th><th>Alış</th><th>Satış</th><th>Stok</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
+        </section>
 
+        <section id="satislar" class="view">
             <div class="card">
-                <div class="stat-title">Pazaryeri</div>
-                <div class="stat-value" id="pazaryeriSayisi">0</div>
+                <h2>Satışlar</h2>
+                <table id="satisTable">
+                    <thead>
+                        <tr><th>Tarih</th><th>Pazar</th><th>Ürün</th><th>Adet</th><th>Satış</th><th>Net Kazanç</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
             </div>
-        </div>
+        </section>
 
-        <div class="card">
-            <h2>Pazaryeri Özeti</h2>
+        <section id="pazaryerleri" class="view">
+            <div class="card">
+                <h2>Pazaryerleri</h2>
+                <table id="pazarTable">
+                    <thead>
+                        <tr><th>ID</th><th>Ad</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
 
-            <table id="dashboardTable">
-                <thead>
-                    <tr>
-                        <th>Pazaryeri</th>
-                        <th>Sipariş</th>
-                        <th>Adet</th>
-                        <th>Toplam Kazanç</th>
-                    </tr>
-                </thead>
+        <section id="stok" class="view">
+            <div class="card">
+                <h2>Stok Takip</h2>
+                <table id="stokTable">
+                    <thead>
+                        <tr><th>Kod</th><th>Ürün</th><th>Stok</th><th>Alış</th><th>Satış</th></tr>
+                    </thead>
+                    <tbody></tbody>
+                </table>
+            </div>
+        </section>
 
-                <tbody></tbody>
-            </table>
-        </div>
+        <section id="raporlar" class="view">
+            <div class="card">
+                <h2>Raporlar</h2>
+                <p>Rapor ekranı sonraki aşamada detaylandırılacak.</p>
+            </div>
+        </section>
     </main>
-
 </div>
 
 <script>
+function sayfaAc(id, btn){
+    document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
+    document.getElementById(id).classList.add("active");
+
+    document.querySelectorAll(".menu button").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+
+    document.getElementById("sayfaBaslik").innerText = btn.innerText;
+    document.getElementById("sayfaAltBaslik").innerText = btn.innerText + " ekranı";
+
+    if(id === "urunler") urunleriGetir();
+    if(id === "satislar") satislariGetir();
+    if(id === "pazaryerleri") pazaryerleriniGetir();
+    if(id === "stok") stokGetir();
+}
+
+function cikisYap(){
+    localStorage.removeItem("verauraLogin");
+    location.reload();
+}
+
 async function dashboardGetir(){
     const response = await fetch("/dashboard");
     const result = await response.json();
-
     const tbody = document.querySelector("#dashboardTable tbody");
     tbody.innerHTML = "";
 
-    let toplamSiparis = 0;
-    let toplamAdet = 0;
-    let toplamKazanc = 0;
+    let toplamSiparis = 0, toplamAdet = 0, toplamKazanc = 0;
 
     result.data.forEach(item => {
         toplamSiparis += Number(item.siparis_sayisi);
@@ -221,14 +171,76 @@ async function dashboardGetir(){
                 <td>${item.siparis_sayisi}</td>
                 <td>${item.toplam_adet}</td>
                 <td class="kazanc">${Number(item.toplam_kazanc).toLocaleString("tr-TR")} ₺</td>
-            </tr>
-        `;
+            </tr>`;
     });
 
-    document.getElementById("toplamSiparis").innerText = toplamSiparis;
+    toplamSiparis.innerText = toplamSiparis;
     document.getElementById("toplamAdet").innerText = toplamAdet;
     document.getElementById("toplamKazanc").innerText = toplamKazanc.toLocaleString("tr-TR") + " ₺";
     document.getElementById("pazaryeriSayisi").innerText = result.data.length;
+}
+
+async function urunleriGetir(){
+    const r = await fetch("/urunler");
+    const j = await r.json();
+    const tbody = document.querySelector("#urunTable tbody");
+    tbody.innerHTML = "";
+
+    j.data.forEach(x => {
+        tbody.innerHTML += `<tr>
+            <td>${x.urun_kodu}</td>
+            <td>${x.urun_adi}</td>
+            <td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td>
+            <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
+            <td>${x.stok}</td>
+        </tr>`;
+    });
+}
+
+async function satislariGetir(){
+    const r = await fetch("/satislar");
+    const j = await r.json();
+    const tbody = document.querySelector("#satisTable tbody");
+    tbody.innerHTML = "";
+
+    j.data.forEach(x => {
+        tbody.innerHTML += `<tr>
+            <td>${String(x.tarih).substring(0,10)}</td>
+            <td>${x.pazaryeri}</td>
+            <td>${x.urun_adi}</td>
+            <td>${x.adet}</td>
+            <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
+            <td class="kazanc">${Number(x.net_kazanc).toLocaleString("tr-TR")} ₺</td>
+        </tr>`;
+    });
+}
+
+async function pazaryerleriniGetir(){
+    const r = await fetch("/pazaryerleri");
+    const j = await r.json();
+    const tbody = document.querySelector("#pazarTable tbody");
+    tbody.innerHTML = "";
+
+    j.data.forEach(x => {
+        tbody.innerHTML += `<tr><td>${x.id}</td><td>${x.ad}</td></tr>`;
+    });
+}
+
+async function stokGetir(){
+    const r = await fetch("/stok");
+    const j = await r.json();
+    const tbody = document.querySelector("#stokTable tbody");
+    tbody.innerHTML = "";
+
+    j.data.forEach(x => {
+        tbody.innerHTML += `<tr>
+            <td>${x.urun_kodu}</td>
+            <td>${x.urun_adi}</td>
+            <td>${x.stok}</td>
+            <td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td>
+            <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
+        </tr>`;
+    });
 }
 
 dashboardGetir();
