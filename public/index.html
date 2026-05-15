@@ -8,7 +8,64 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;font-family:Arial,sans-serif;background:#f4f6fb;color:#111827}
-.layout{display:flex;min-height:100vh}
+
+/* LOGIN */
+.login-page{
+    min-height:100vh;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    background:linear-gradient(135deg,#020617,#111827);
+}
+.login-box{
+    width:380px;
+    background:#0f172a;
+    padding:35px;
+    border-radius:22px;
+    box-shadow:0 0 40px rgba(255,0,184,.25);
+    border:1px solid rgba(255,0,184,.35);
+}
+.login-logo{
+    text-align:center;
+    font-size:34px;
+    font-weight:bold;
+    color:#ff00b8;
+    margin-bottom:8px;
+}
+.login-sub{
+    text-align:center;
+    color:#94a3b8;
+    margin-bottom:28px;
+}
+.login-box input{
+    width:100%;
+    padding:14px;
+    margin-bottom:14px;
+    border:none;
+    border-radius:10px;
+    background:#1e293b;
+    color:white;
+    outline:none;
+}
+.login-box button{
+    width:100%;
+    padding:14px;
+    border:none;
+    border-radius:10px;
+    background:#ff00b8;
+    color:white;
+    font-weight:bold;
+    cursor:pointer;
+}
+.error{
+    display:none;
+    color:#ff6b6b;
+    text-align:center;
+    margin-top:15px;
+}
+
+/* PANEL */
+.layout{display:none;min-height:100vh}
 .sidebar{width:250px;background:#0f172a;color:white;padding:22px}
 .logo{font-size:26px;font-weight:bold;color:#ff00b8;margin-bottom:35px}
 .menu button{width:100%;background:transparent;color:#cbd5e1;border:none;padding:13px;text-align:left;border-radius:10px;cursor:pointer;margin-bottom:8px;font-size:15px}
@@ -31,7 +88,21 @@ th{background:#f8fafc;color:#475569}
 
 <body>
 
-<div class="layout">
+<div class="login-page" id="loginPage">
+    <div class="login-box">
+        <div class="login-logo">VERAURA</div>
+        <div class="login-sub">Satış & Stok Takip Paneli</div>
+
+        <input type="text" id="username" placeholder="Kullanıcı adı">
+        <input type="password" id="password" placeholder="Şifre">
+
+        <button onclick="login()">Giriş Yap</button>
+
+        <div class="error" id="errorBox">Kullanıcı adı veya şifre hatalı</div>
+    </div>
+</div>
+
+<div class="layout" id="panel">
     <aside class="sidebar">
         <div class="logo">VERAURA</div>
 
@@ -65,9 +136,7 @@ th{background:#f8fafc;color:#475569}
             <div class="card">
                 <h2>Pazaryeri Özeti</h2>
                 <table id="dashboardTable">
-                    <thead>
-                        <tr><th>Pazaryeri</th><th>Sipariş</th><th>Adet</th><th>Toplam Kazanç</th></tr>
-                    </thead>
+                    <thead><tr><th>Pazaryeri</th><th>Sipariş</th><th>Adet</th><th>Toplam Kazanç</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -77,9 +146,7 @@ th{background:#f8fafc;color:#475569}
             <div class="card">
                 <h2>Ürünler</h2>
                 <table id="urunTable">
-                    <thead>
-                        <tr><th>Kod</th><th>Ürün</th><th>Alış</th><th>Satış</th><th>Stok</th></tr>
-                    </thead>
+                    <thead><tr><th>Kod</th><th>Ürün</th><th>Alış</th><th>Satış</th><th>Stok</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -89,9 +156,7 @@ th{background:#f8fafc;color:#475569}
             <div class="card">
                 <h2>Satışlar</h2>
                 <table id="satisTable">
-                    <thead>
-                        <tr><th>Tarih</th><th>Pazar</th><th>Ürün</th><th>Adet</th><th>Satış</th><th>Net Kazanç</th></tr>
-                    </thead>
+                    <thead><tr><th>Tarih</th><th>Pazar</th><th>Ürün</th><th>Adet</th><th>Satış</th><th>Net Kazanç</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -101,9 +166,7 @@ th{background:#f8fafc;color:#475569}
             <div class="card">
                 <h2>Pazaryerleri</h2>
                 <table id="pazarTable">
-                    <thead>
-                        <tr><th>ID</th><th>Ad</th></tr>
-                    </thead>
+                    <thead><tr><th>ID</th><th>Ad</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -113,9 +176,7 @@ th{background:#f8fafc;color:#475569}
             <div class="card">
                 <h2>Stok Takip</h2>
                 <table id="stokTable">
-                    <thead>
-                        <tr><th>Kod</th><th>Ürün</th><th>Stok</th><th>Alış</th><th>Satış</th></tr>
-                    </thead>
+                    <thead><tr><th>Kod</th><th>Ürün</th><th>Stok</th><th>Alış</th><th>Satış</th></tr></thead>
                     <tbody></tbody>
                 </table>
             </div>
@@ -131,6 +192,29 @@ th{background:#f8fafc;color:#475569}
 </div>
 
 <script>
+function login(){
+    const username = document.getElementById("username").value;
+    const password = document.getElementById("password").value;
+
+    if(username === "isurgit" && password === "9876"){
+        localStorage.setItem("verauraLogin","true");
+        panelAc();
+    }else{
+        document.getElementById("errorBox").style.display = "block";
+    }
+}
+
+function panelAc(){
+    document.getElementById("loginPage").style.display = "none";
+    document.getElementById("panel").style.display = "flex";
+    dashboardGetir();
+}
+
+function cikisYap(){
+    localStorage.removeItem("verauraLogin");
+    location.reload();
+}
+
 function sayfaAc(id, btn){
     document.querySelectorAll(".view").forEach(v => v.classList.remove("active"));
     document.getElementById(id).classList.add("active");
@@ -147,23 +231,18 @@ function sayfaAc(id, btn){
     if(id === "stok") stokGetir();
 }
 
-function cikisYap(){
-    localStorage.removeItem("verauraLogin");
-    location.reload();
-}
-
 async function dashboardGetir(){
     const response = await fetch("/dashboard");
     const result = await response.json();
     const tbody = document.querySelector("#dashboardTable tbody");
     tbody.innerHTML = "";
 
-    let toplamSiparis = 0, toplamAdet = 0, toplamKazanc = 0;
+    let siparis = 0, adet = 0, kazanc = 0;
 
     result.data.forEach(item => {
-        toplamSiparis += Number(item.siparis_sayisi);
-        toplamAdet += Number(item.toplam_adet);
-        toplamKazanc += Number(item.toplam_kazanc);
+        siparis += Number(item.siparis_sayisi);
+        adet += Number(item.toplam_adet);
+        kazanc += Number(item.toplam_kazanc);
 
         tbody.innerHTML += `
             <tr>
@@ -174,9 +253,9 @@ async function dashboardGetir(){
             </tr>`;
     });
 
-    toplamSiparis.innerText = toplamSiparis;
-    document.getElementById("toplamAdet").innerText = toplamAdet;
-    document.getElementById("toplamKazanc").innerText = toplamKazanc.toLocaleString("tr-TR") + " ₺";
+    document.getElementById("toplamSiparis").innerText = siparis;
+    document.getElementById("toplamAdet").innerText = adet;
+    document.getElementById("toplamKazanc").innerText = kazanc.toLocaleString("tr-TR") + " ₺";
     document.getElementById("pazaryeriSayisi").innerText = result.data.length;
 }
 
@@ -243,7 +322,9 @@ async function stokGetir(){
     });
 }
 
-dashboardGetir();
+if(localStorage.getItem("verauraLogin") === "true"){
+    panelAc();
+}
 </script>
 
 </body>
