@@ -127,17 +127,37 @@ app.delete("/pazaryeri-sil/:id", (req, res) => {
     const { id } = req.params;
 
     db.query(
-        "DELETE FROM pazaryerleri WHERE id = ?",
+        "DELETE FROM satislar WHERE pazaryeri_id = ?",
         [id],
         (err) => {
+
             if (err) {
-                return res.status(500).json({ success: false, error: err.message });
+                return res.status(500).json({
+                    success: false,
+                    error: err.message
+                });
             }
 
-            res.json({
-                success: true,
-                message: "Pazaryeri silindi"
-            });
+            db.query(
+                "DELETE FROM pazaryerleri WHERE id = ?",
+                [id],
+                (err2) => {
+
+                    if (err2) {
+                        return res.status(500).json({
+                            success: false,
+                            error: err2.message
+                        });
+                    }
+
+                    res.json({
+                        success: true,
+                        message: "Pazaryeri silindi"
+                    });
+
+                }
+            );
+
         }
     );
 });
@@ -244,23 +264,46 @@ app.put("/urun-guncelle/:id", (req, res) => {
 });
 
 app.delete("/urun-sil/:id", (req, res) => {
+
     const { id } = req.params;
 
     db.query(
-        "DELETE FROM urunler WHERE id = ?",
+        "DELETE FROM satislar WHERE urun_id = ?",
         [id],
         (err) => {
+
             if (err) {
-                return res.status(500).json({ success: false, error: err.message });
+                return res.status(500).json({
+                    success: false,
+                    error: err.message
+                });
             }
 
-            res.json({
-                success: true,
-                message: "Ürün silindi"
-            });
+            db.query(
+                "DELETE FROM urunler WHERE id = ?",
+                [id],
+                (err2) => {
+
+                    if (err2) {
+                        return res.status(500).json({
+                            success: false,
+                            error: err2.message
+                        });
+                    }
+
+                    res.json({
+                        success: true,
+                        message: "Ürün silindi"
+                    });
+
+                }
+            );
+
         }
     );
+
 });
+
 
 app.get("/satislar", (req, res) => {
     const sql = `
