@@ -344,6 +344,126 @@ app.get("/stok", (req, res) => {
     });
 });
 
+app.delete("/urun-sil/:id", (req, res) => {
+    const { id } = req.params;
+
+    db.query("SELECT COUNT(*) AS adet FROM satislar WHERE urun_id = ?", [id], (err, rows) => {
+        if (err) return res.status(500).json({ success:false, error:err.message });
+
+        if (rows[0].adet > 0) {
+            return res.status(400).json({
+                success:false,
+                message:"Bu ürün satışlarda kullanıldığı için silinemez"
+            });
+        }
+
+        db.query("DELETE FROM urunler WHERE id = ?", [id], (err) => {
+            if (err) return res.status(500).json({ success:false, error:err.message });
+
+            res.json({
+                success:true,
+                message:"Ürün silindi"
+            });
+        });
+    });
+});
+
+app.delete("/pazaryeri-sil/:id", (req, res) => {
+    const { id } = req.params;
+
+    db.query("SELECT COUNT(*) AS adet FROM satislar WHERE pazaryeri_id = ?", [id], (err, rows) => {
+        if (err) return res.status(500).json({ success:false, error:err.message });
+
+        if (rows[0].adet > 0) {
+            return res.status(400).json({
+                success:false,
+                message:"Bu pazaryeri satışlarda kullanıldığı için silinemez"
+            });
+        }
+
+        db.query("DELETE FROM pazaryerleri WHERE id = ?", [id], (err) => {
+            if (err) return res.status(500).json({ success:false, error:err.message });
+
+            res.json({
+                success:true,
+                message:"Pazaryeri silindi"
+            });
+        });
+    });
+});
+
+app.delete("/satis-sil/:id", (req, res) => {
+    const { id } = req.params;
+
+    db.getConnection((err, connection) => {
+        if (err) return res.status(500).json({ success:false, error:err.message });
+
+        connection.beginTransaction((err) => {
+            if (err) {
+                connection.release();
+                return res.status(500).json({ success:false, error:err.message });
+            }
+
+            connection.query(
+                "SELECT urun_id, adet FROM satislar WHERE id = ?",
+                [id],
+                (err, rows) => {
+                    if (err || rows.length === 0) {
+                        return connection.rollback(() => {
+                            connection.release();
+                            res.status(404).json({
+                                success:false,
+                                message:"Satış bulunamadı"
+                            });
+                        });
+                    }
+
+                    const urunId = rows[0].urun_id;
+                    const adet = rows[0].adet;
+
+                    connection.query("DELETE FROM satislar WHERE id = ?", [id], (err) => {
+                        if (err) {
+                            return connection.rollback(() => {
+                                connection.release();
+                                res.status(500).json({ success:false, error:err.message });
+                            });
+                        }
+
+                        connection.query(
+                            "UPDATE urunler SET stok = stok + ? WHERE id = ?",
+                            [adet, urunId],
+                            (err) => {
+                                if (err) {
+                                    return connection.rollback(() => {
+                                        connection.release();
+                                        res.status(500).json({ success:false, error:err.message });
+                                    });
+                                }
+
+                                connection.commit((err) => {
+                                    if (err) {
+                                        return connection.rollback(() => {
+                                            connection.release();
+                                            res.status(500).json({ success:false, error:err.message });
+                                        });
+                                    }
+
+                                    connection.release();
+
+                                    res.json({
+                                        success:true,
+                                        message:"Satış silindi, stok geri eklendi"
+                                    });
+                                });
+                            }
+                        );
+                    });
+                }
+            );
+        });
+    });
+});
+
 const PORT = process.env.PORT || 3000;
 
 app.listen(PORT, () => {

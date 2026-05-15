@@ -3,7 +3,6 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-
 <title>VERAURA PANEL</title>
 
 <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
@@ -34,7 +33,7 @@ body{
 
 .logo{
     color:#ff00b7;
-    font-size:22px;
+    font-size:28px;
     font-weight:bold;
     margin-bottom:40px;
 }
@@ -44,7 +43,7 @@ body{
     padding:14px;
     margin-bottom:10px;
     border:none;
-    border-radius:10px;
+    border-radius:12px;
     background:transparent;
     color:#fff;
     text-align:left;
@@ -53,22 +52,12 @@ body{
 }
 
 .menu button:hover{
-    background:#16213f;
+    background:#18284d;
 }
 
 .content{
     flex:1;
-    padding:24px;
-}
-
-.topbar{
-    background:#fff;
-    border-radius:18px;
     padding:20px;
-    margin-bottom:20px;
-    display:flex;
-    justify-content:space-between;
-    align-items:center;
 }
 
 .card{
@@ -81,7 +70,7 @@ body{
 .cards{
     display:grid;
     grid-template-columns:repeat(4,1fr);
-    gap:16px;
+    gap:20px;
     margin-bottom:20px;
 }
 
@@ -92,13 +81,8 @@ body{
 }
 
 .stat h3{
-    color:#60708f;
-    font-size:15px;
+    color:#666;
     margin-bottom:10px;
-}
-
-.stat h1{
-    font-size:20px;
 }
 
 table{
@@ -107,9 +91,9 @@ table{
 }
 
 table th{
-    text-align:left;
+    background:#f5f5f5;
     padding:14px;
-    background:#f5f6fa;
+    text-align:left;
 }
 
 table td{
@@ -120,8 +104,8 @@ table td{
 input,select{
     width:100%;
     padding:14px;
-    border-radius:10px;
     border:1px solid #ddd;
+    border-radius:10px;
     margin-bottom:10px;
 }
 
@@ -134,6 +118,15 @@ input,select{
     cursor:pointer;
 }
 
+.delete-btn{
+    padding:8px 14px;
+    border:none;
+    border-radius:8px;
+    background:#ff3b3b;
+    color:#fff;
+    cursor:pointer;
+}
+
 .view{
     display:none;
 }
@@ -142,24 +135,9 @@ input,select{
     display:block;
 }
 
-.grid2{
-    display:grid;
-    grid-template-columns:1fr 1fr;
-    gap:20px;
-}
-
 canvas{
     width:100%!important;
-    height:400px!important;
-}
-
-.delete-btn{
-    background:#ff3b3b;
-    color:#fff;
-    border:none;
-    padding:8px 12px;
-    border-radius:8px;
-    cursor:pointer;
+    height:350px!important;
 }
 
 </style>
@@ -183,17 +161,6 @@ canvas{
     </div>
 
     <div class="content">
-
-        <div class="topbar">
-            <div>
-                <h2 id="sayfaBaslik">Dashboard</h2>
-                <p id="sayfaAlt">Dashboard ekranı</p>
-            </div>
-
-            <button class="action-btn">
-                Çıkış
-            </button>
-        </div>
 
         <!-- DASHBOARD -->
 
@@ -223,31 +190,9 @@ canvas{
 
             </div>
 
-            <div class="grid2">
-
-                <div class="card">
-                    <h2>Pazaryeri Kazanç Grafiği</h2>
-                    <canvas id="pazaryeriChart"></canvas>
-                </div>
-
-                <div class="card">
-                    <h2>Pazaryeri Özeti</h2>
-
-                    <table id="dashboardTable">
-                        <thead>
-                            <tr>
-                                <th>Pazaryeri</th>
-                                <th>Sipariş</th>
-                                <th>Adet</th>
-                                <th>Toplam Kazanç</th>
-                            </tr>
-                        </thead>
-
-                        <tbody></tbody>
-
-                    </table>
-                </div>
-
+            <div class="card">
+                <h2>Pazaryeri Kazanç Grafiği</h2>
+                <canvas id="pazaryeriChart"></canvas>
             </div>
 
         </section>
@@ -285,6 +230,7 @@ canvas{
                             <th>Alış</th>
                             <th>Satış</th>
                             <th>Stok</th>
+                            <th>İşlem</th>
                         </tr>
                     </thead>
 
@@ -337,6 +283,7 @@ canvas{
                             <th>Ürün</th>
                             <th>Adet</th>
                             <th>Kazanç</th>
+                            <th>İşlem</th>
                         </tr>
                     </thead>
 
@@ -374,6 +321,7 @@ canvas{
                         <tr>
                             <th>ID</th>
                             <th>Ad</th>
+                            <th>İşlem</th>
                         </tr>
                     </thead>
 
@@ -427,27 +375,15 @@ function sayfaAc(id){
 
     document.getElementById(id).classList.add("active");
 
-    if(id==="dashboard"){
-        dashboardGetir();
-    }
-
-    if(id==="urunler"){
-        urunleriGetir();
-    }
-
+    if(id==="dashboard") dashboardGetir();
+    if(id==="urunler") urunleriGetir();
     if(id==="satislar"){
         satislariGetir();
-        pazaryerleriGetir();
         urunleriGetir();
-    }
-
-    if(id==="pazaryerleri"){
         pazaryerleriGetir();
     }
-
-    if(id==="stok"){
-        stokGetir();
-    }
+    if(id==="pazaryerleri") pazaryerleriGetir();
+    if(id==="stok") stokGetir();
 
 }
 
@@ -456,38 +392,25 @@ async function dashboardGetir(){
     const r=await fetch("/dashboard");
     const j=await r.json();
 
-    const tbody=document.querySelector("#dashboardTable tbody");
-    tbody.innerHTML="";
-
-    let toplamSiparis=0;
-    let toplamAdet=0;
-    let toplamKazanc=0;
+    let siparis=0;
+    let adet=0;
+    let kazanc=0;
 
     const labels=[];
     const values=[];
 
     j.data.forEach(x=>{
-
-        toplamSiparis+=Number(x.siparis_sayisi);
-        toplamAdet+=Number(x.toplam_adet);
-        toplamKazanc+=Number(x.toplam_kazanc);
+        siparis += Number(x.siparis_sayisi);
+        adet += Number(x.toplam_adet);
+        kazanc += Number(x.toplam_kazanc);
 
         labels.push(x.pazaryeri);
         values.push(Number(x.toplam_kazanc));
-
-        tbody.innerHTML+=`
-            <tr>
-                <td>${x.pazaryeri}</td>
-                <td>${x.siparis_sayisi}</td>
-                <td>${x.toplam_adet}</td>
-                <td>${Number(x.toplam_kazanc).toLocaleString("tr-TR")} ₺</td>
-            </tr>
-        `;
     });
 
-    toplamSiparisEl.innerText=toplamSiparis;
-    toplamAdetEl.innerText=toplamAdet;
-    toplamKazancEl.innerText=toplamKazanc.toLocaleString("tr-TR")+" ₺";
+    toplamSiparis.innerText=siparis;
+    toplamAdet.innerText=adet;
+    toplamKazanc.innerText=kazanc.toLocaleString("tr-TR")+" ₺";
     pazaryeriSayisi.innerText=j.data.length;
 
     const ctx=document.getElementById("pazaryeriChart");
@@ -508,21 +431,100 @@ async function dashboardGetir(){
 
 }
 
-async function pazaryeriEkle(){
+async function urunEkle(){
 
-    const ad=document.getElementById("pazaryeri_adi").value;
+    const r=await fetch("/urun-ekle",{
+        method:"POST",
+        headers:{
+            "Content-Type":"application/json"
+        },
+        body:JSON.stringify({
+            urun_kodu:urun_kodu.value,
+            urun_adi:urun_adi.value,
+            alis_fiyati:alis_fiyati.value,
+            satis_fiyati:satis_fiyati.value,
+            stok:stok_miktari.value
+        })
+    });
+
+    const j=await r.json();
+
+    alert(j.message || j.error);
+
+    urunleriGetir();
+    stokGetir();
+
+}
+
+async function urunleriGetir(){
+
+    const r=await fetch("/urunler");
+    const j=await r.json();
+
+    const tbody=document.querySelector("#urunTable tbody");
+    tbody.innerHTML="";
+
+    satis_urun.innerHTML="<option value=''>Ürün Seç</option>";
+
+    j.data.forEach(x=>{
+
+        tbody.innerHTML+=`
+            <tr>
+                <td>${x.urun_kodu}</td>
+                <td>${x.urun_adi}</td>
+                <td>${x.alis_fiyati} ₺</td>
+                <td>${x.satis_fiyati} ₺</td>
+                <td>${x.stok}</td>
+                <td>
+                    <button class="delete-btn" onclick="urunSil(${x.id})">
+                        Sil
+                    </button>
+                </td>
+            </tr>
+        `;
+
+        satis_urun.innerHTML+=`
+            <option value="${x.id}">
+                ${x.urun_adi}
+            </option>
+        `;
+
+    });
+
+}
+
+async function urunSil(id){
+
+    if(!confirm("Ürün silinsin mi?")) return;
+
+    const r=await fetch("/urun-sil/"+id,{
+        method:"DELETE"
+    });
+
+    const j=await r.json();
+
+    alert(j.message || j.error);
+
+    urunleriGetir();
+    stokGetir();
+
+}
+
+async function pazaryeriEkle(){
 
     const r=await fetch("/pazaryeri-ekle",{
         method:"POST",
         headers:{
             "Content-Type":"application/json"
         },
-        body:JSON.stringify({ad})
+        body:JSON.stringify({
+            ad:pazaryeri_adi.value
+        })
     });
 
     const j=await r.json();
 
-    alert(j.message);
+    alert(j.message || j.error);
 
     pazaryerleriGetir();
 
@@ -544,6 +546,11 @@ async function pazaryerleriGetir(){
             <tr>
                 <td>${x.id}</td>
                 <td>${x.ad}</td>
+                <td>
+                    <button class="delete-btn" onclick="pazaryeriSil(${x.id})">
+                        Sil
+                    </button>
+                </td>
             </tr>
         `;
 
@@ -557,91 +564,48 @@ async function pazaryerleriGetir(){
 
 }
 
-async function urunEkle(){
+async function pazaryeriSil(id){
 
-    const data={
-        urun_kodu:urun_kodu.value,
-        urun_adi:urun_adi.value,
-        alis_fiyati:alis_fiyati.value,
-        satis_fiyati:satis_fiyati.value,
-        stok:stok_miktari.value
-    };
+    if(!confirm("Pazaryeri silinsin mi?")) return;
 
-    const r=await fetch("/urun-ekle",{
-        method:"POST",
-        headers:{
-            "Content-Type":"application/json"
-        },
-        body:JSON.stringify(data)
+    const r=await fetch("/pazaryeri-sil/"+id,{
+        method:"DELETE"
     });
 
     const j=await r.json();
 
-    alert(j.message);
+    alert(j.message || j.error);
 
-    urunleriGetir();
-
-}
-
-async function urunleriGetir(){
-
-    const r=await fetch("/urunler");
-    const j=await r.json();
-
-    const tbody=document.querySelector("#urunTable tbody");
-    tbody.innerHTML="";
-
-    satis_urun.innerHTML="<option value=''>Ürün Seç</option>";
-
-    j.data.forEach(x=>{
-
-        tbody.innerHTML+=`
-            <tr>
-                <td>${x.urun_kodu}</td>
-                <td>${x.urun_adi}</td>
-                <td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td>
-                <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
-                <td>${x.stok}</td>
-            </tr>
-        `;
-
-        satis_urun.innerHTML+=`
-            <option value="${x.id}">
-                ${x.urun_adi}
-            </option>
-        `;
-
-    });
+    pazaryerleriGetir();
+    dashboardGetir();
 
 }
 
 async function satisEkle(){
-
-    const data={
-        tarih:satis_tarih.value,
-        pazaryeri_id:satis_pazaryeri.value,
-        urun_id:satis_urun.value,
-        adet:satis_adet.value,
-        satis_fiyati:satis_fiyat.value,
-        kdv_orani:satis_kdv.value,
-        kargo_ucreti:satis_kargo.value
-    };
 
     const r=await fetch("/satis-ekle",{
         method:"POST",
         headers:{
             "Content-Type":"application/json"
         },
-        body:JSON.stringify(data)
+        body:JSON.stringify({
+            tarih:satis_tarih.value,
+            pazaryeri_id:satis_pazaryeri.value,
+            urun_id:satis_urun.value,
+            adet:satis_adet.value,
+            satis_fiyati:satis_fiyat.value,
+            kdv_orani:satis_kdv.value,
+            kargo_ucreti:satis_kargo.value
+        })
     });
 
     const j=await r.json();
 
-    alert(j.message);
+    alert(j.message || j.error);
 
     satislariGetir();
-    dashboardGetir();
     stokGetir();
+    dashboardGetir();
 
 }
 
@@ -661,11 +625,34 @@ async function satislariGetir(){
                 <td>${x.pazaryeri}</td>
                 <td>${x.urun_adi}</td>
                 <td>${x.adet}</td>
-                <td>${Number(x.net_kazanc).toLocaleString("tr-TR")} ₺</td>
+                <td>${x.net_kazanc} ₺</td>
+                <td>
+                    <button class="delete-btn" onclick="satisSil(${x.id})">
+                        Sil
+                    </button>
+                </td>
             </tr>
         `;
 
     });
+
+}
+
+async function satisSil(id){
+
+    if(!confirm("Satış silinsin mi?")) return;
+
+    const r=await fetch("/satis-sil/"+id,{
+        method:"DELETE"
+    });
+
+    const j=await r.json();
+
+    alert(j.message || j.error);
+
+    satislariGetir();
+    stokGetir();
+    dashboardGetir();
 
 }
 
@@ -684,18 +671,14 @@ async function stokGetir(){
                 <td>${x.urun_kodu}</td>
                 <td>${x.urun_adi}</td>
                 <td>${x.stok}</td>
-                <td>${Number(x.alis_fiyati).toLocaleString("tr-TR")} ₺</td>
-                <td>${Number(x.satis_fiyati).toLocaleString("tr-TR")} ₺</td>
+                <td>${x.alis_fiyati} ₺</td>
+                <td>${x.satis_fiyati} ₺</td>
             </tr>
         `;
 
     });
 
 }
-
-const toplamSiparisEl=document.getElementById("toplamSiparis");
-const toplamAdetEl=document.getElementById("toplamAdet");
-const toplamKazancEl=document.getElementById("toplamKazanc");
 
 dashboardGetir();
 
